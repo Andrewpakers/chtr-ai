@@ -1,7 +1,9 @@
 import '../styles/globals.css';
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
+import { getFirestore } from "firebase/firestore";
+import '../node_modules/react-chat-elements/dist/main.css'
+import { saveUser } from '../utils/storageManager';
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -19,8 +21,10 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
 export default function App({ Component, pageProps }) {
+  saveUser();
   return (
     <div className="px-3">
         <link rel="stylesheet" href="https://rsms.me/inter/inter.css"></link>

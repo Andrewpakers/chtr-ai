@@ -1,6 +1,6 @@
 import Head from "next/head";
 import { useState } from "react";
-import { Button, Navbar } from "flowbite-react";
+import { Button, Navbar, Footer } from "flowbite-react";
 import Image from 'next/image';
 import {
   getAuth,
@@ -9,6 +9,7 @@ import {
   signOut,
   onAuthStateChanged,
 } from "firebase/auth";
+import logoImage from "../public/assets/logo.png";
 
 async function signIn() {
   // Sign in Firebase using popup auth and Google as the identity provider.
@@ -16,7 +17,7 @@ async function signIn() {
   try {
     await signInWithPopup(getAuth(), provider);
   } catch (error) {
-    console.log(error);
+    console.error(error);
   }
 }
 function signOutUser() {
@@ -80,19 +81,15 @@ export default function Layout ({children}) {
         <Head>
             <title>Chtr.ai</title>
             <link rel="icon" href="/favicon.ico" />
-            {/* <body>
-                <script src="../node_modules/flowbite/dist/flowbite.min.js"></script>
-                <script src="../node_modules/flowbite/dist/flowbite.min.js"></script>
-            </body> */}
         </Head>
         <div className="border-b-2 border-slate-500">
             <Navbar
                 fluid={true}
                 rounded={true}
                 >
-                <Navbar.Brand href="https://flowbite.com/">
+                <Navbar.Brand href="/">
                     <Image
-                    src="/../public/assets/logo.png"
+                    src={logoImage}
                     width={100}
                     height={100}
                     className="mr-4"
@@ -125,6 +122,26 @@ export default function Layout ({children}) {
         </div>
         <div className="">
             {children}
+        </div>
+        <div className="border-t-2 border-slate-500">
+          <Footer container={true} className="flex">
+            <Footer.Copyright
+              href="#"
+              by="Chtr.ai™"
+              year={2022}
+            />
+            <Footer.LinkGroup className="ml-auto flex gap-4">
+              <Footer.Link href="/site/about">
+                About
+              </Footer.Link>
+              <Footer.Link href="/site/licensing">
+                Licensing
+              </Footer.Link>
+              <Footer.Link href="/site/contact">
+                Contact
+              </Footer.Link>
+            </Footer.LinkGroup>
+          </Footer>
         </div>
     </div>
     );

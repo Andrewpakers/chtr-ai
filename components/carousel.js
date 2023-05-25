@@ -5,20 +5,26 @@ import Image from "next/image";
 export default function ChtrCarousel() {
     const images = getImages();
     return (
-        // <div className="h-56 sm:h-64 xl:h-80 2xl:h-96" style={{width: "fit"}}>
-        <div className="my-5" style={{height: "500px", display: "flex",}}>
+        // <div className="h-56 max-sm:h-64 style={{height: "500px"}} max-xl:h-80 max-2xl:h-96" style={{width: "fit"}}>
+        <div className="my-5 h-[500px] max-md:h-[400px] max-sm:h-[300px]">
             <Carousel>
-                <Image
-                src={images[0].img}
-                alt={images[0].alt}
-                />
+                <div>
+                    <Image
+                    src={images[0].img}
+                    alt={images[0].alt}
+                    priority={true}
+                    />
+                    <h2 className="text-white absolute bottom-20 right-20 text-4xl font-bold">TEST</h2>
+                </div>
                 <Image
                 src={images[1].img}
                 alt={images[1].alt}
+                priority={true}
                 />
                 <Image
                 src={images[2].img}
                 alt={images[2].alt}
+                priority={true}
                 />
             </Carousel>
         </div>
