@@ -1,74 +1,22 @@
 import Head from "next/head";
-import { useState } from "react";
-import { Button, Navbar, Footer } from "flowbite-react";
+import { useState, useContext, useEffect } from "react";
+import { Navbar, Footer } from "flowbite-react";
 import Image from 'next/image';
+import Link from "next/link";
 import {
   getAuth,
-  GoogleAuthProvider,
-  signInWithPopup,
-  signOut,
   onAuthStateChanged,
 } from "firebase/auth";
 import logoImage from "../public/assets/logo.png";
+import { chatContext, chatroomListContext } from "../context/context";
+import { isUserSignedIn, SignIn, UsernameLink } from "../utils/auth";
 
-async function signIn() {
-  // Sign in Firebase using popup auth and Google as the identity provider.
-  const provider = new GoogleAuthProvider();
-  try {
-    await signInWithPopup(getAuth(), provider);
-  } catch (error) {
-    console.error(error);
-  }
-}
-function signOutUser() {
-  // Sign out of Firebase.
-  signOut(getAuth());
-}
-// Returns the signed-in user's display name.
-function getUserName() {
-  if (isUserSignedIn()) {
-    return getAuth().currentUser.displayName;
-  } 
-  return null;
-}
 
-// Returns true if a user is signed-in.
-function isUserSignedIn() {
-  return !!getAuth().currentUser;
-}
-//Sign user in
-function SignIn({ isSignedIn }) {
-  if (isSignedIn) {
-    return (
-      <div >
-          <Button type="button" onClick={signOutUser}>
-            Sign Out
-          </Button>
-      </div>
-    );
-  }
-  return (
-    <div >
-      <Button type="button" onClick={signIn}>
-        Sign in
-      </Button>
-    </div>
-  );
-}
-// If user is signed in, create link to account page
-function UsernameLink(){
-    if (isUserSignedIn) {
-        return (
-            <Navbar.Link href="/">
-                    {getUserName()}
-            </Navbar.Link>
-        );
-    } else {
-        return null;
-    }
-}
 export default function Layout ({children}) {
     const [isSignedIn, setIsSignedIn] = useState(isUserSignedIn());
+    const [activeChat, setActiveChat] = useContext(chatContext);
+    const [chatrooms, setChatrooms] = useContext(chatroomListContext);
+
     onAuthStateChanged(getAuth(), (user) => {
       if (user) {
         setIsSignedIn(true);
@@ -76,6 +24,7 @@ export default function Layout ({children}) {
         setIsSignedIn(false);
       }
     });
+
     return (
     <div className="max-w-4xl mx-auto">
         <Head>
@@ -91,9 +40,10 @@ export default function Layout ({children}) {
                     <Image
                     src={logoImage}
                     width={100}
-                    height={100}
+                    height={'auto'}
                     className="mr-4"
-                    alt="Flowbite Logo"
+                    alt="Chtr.ai Logo"
+                    priority={true}
                     />
                     <span className="self-center whitespace-nowrap text-xl font-semibold dark:text-white">
                     Chtr.ai
@@ -107,15 +57,14 @@ export default function Layout ({children}) {
                     <Navbar.Toggle />
                 </div>
                 <Navbar.Collapse>
-                    <Navbar.Link
+                    <Link
                     href="/"
-                    active={true}
                     >
                     Home
-                    </Navbar.Link>
-                    <Navbar.Link href="/chat">
+                    </Link>
+                    <Link href="/chat">
                     Chat
-                    </Navbar.Link>
+                    </Link>
                     <UsernameLink />
                 </Navbar.Collapse>
             </Navbar>

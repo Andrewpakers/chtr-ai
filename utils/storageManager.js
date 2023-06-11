@@ -1,7 +1,4 @@
-import {
-    getAuth,
-    onAuthStateChanged,
-} from 'firebase/auth';
+import { getUserID, getUserObj, isUserSignedIn } from './auth';
 import {
     getFirestore,
     query,
@@ -15,9 +12,10 @@ import {
     limit,
     serverTimestamp,
     addDoc,
-    Timestamp
+    Timestamp,
+    onSnapshot
 } from 'firebase/firestore';
-import { setRequestMeta } from 'next/dist/server/request-meta';
+
 // constant that determines what collection to retrieve chatrooms.
 // "test" for test, "prod" for prod
 const CHATROOMS = "test";
@@ -46,7 +44,9 @@ async function getCurrentServerTime() {
             await setDoc(doc(collection(getFirestore(), "time"), 'time'), {
                 date: serverTimestamp(),
             });
+
             const date = (await getDoc(doc(collection(getFirestore(), "time"), 'time'))).data().date;
+            // const date = mockDate;
             return date;
         }
         catch(error) {
@@ -68,7 +68,28 @@ export async function getAllChats() {
     return chatroomsListObj.data().rooms;
 }
 
+export async function formatMessage(docObj, id, userID) {
+    const authorDisplayName = (await getUser(docObj.author)).name;
+    const messageObj = {
+        type: 'text',
+        title: authorDisplayName,
+        text: String(docObj.message),
+        posted: docObj.posted.toDate(),
+        author: docObj.author,
+        id: id,
+    }
+    if (docObj.author === userID) {
+        messageObj.position = 'right';
+    } else {
+        messageObj.position = 'left';
+    }
+    return messageObj;
+}
+
 export async function getMessages(chatroom, dateArg, limitArg = 20) {
+    if (!chatroom) {
+        return [];
+    }
     // set date
     let date;
     if (!dateArg) {
@@ -92,16 +113,46 @@ export async function getMessages(chatroom, dateArg, limitArg = 20) {
     }
     // create array of message objects
     const messageArray = [];
-    querySnapshot.forEach((doc) => {
-        messageArray.push({
-            message: doc.data().message,
-            posted: doc.data().posted,
-            author: doc.data().author,
-            id: doc.id,
-        })
-    });
+    const userID = getUserID();
+    for (let i = 0; i < querySnapshot.docs.length; i++) {
+        const docObj = querySnapshot.docs[i].data();
+        const messageObj = await formatMessage(docObj, querySnapshot.docs[i].id, userID);
+        messageArray.unshift(messageObj)
+    }
     return messageArray;
 }
+
+export async function subChatroom(chatrooms, callback, messages) {
+    // const q = query(collection(db, "cities"), where("state", "==", "CA"));
+    /**
+     * todo: New messages needs to convert messages into the right format
+     * 
+     * the subscribe function is broken and erases all messages on update
+     * There needs to be an unsubscribe function in order to unsubscibe
+     * when the activeChat changes
+     */
+    
+    if (!chatrooms) {
+        return
+    }
+    let time = await getCurrentServerTime();
+
+    for (let j = 0; j < chatrooms.length; j++) {
+        const q = query(collection(getFirestore(), `public-chatrooms/${CHATROOMS}/${chatrooms[j].name}`), where("posted", ">", time), orderBy('posted', 'desc'));
+        const unsubscribe = onSnapshot(q, async (querySnapshot) => {
+            const userID = getUserID();
+            let messageObj;
+            if (querySnapshot.docs.length > 0) {
+                messageObj = await formatMessage(querySnapshot.docs[0].data(), querySnapshot.docs[0].id, userID);
+            }
+            time = getCurrentServerTime();
+            if (messageObj) {
+                callback(messageObj, chatrooms[j].name);
+            }
+        });
+    }
+}
+
 /**
  * 
  * message schema:
@@ -113,9 +164,8 @@ export async function getMessages(chatroom, dateArg, limitArg = 20) {
  */
 export async function postMessage(chatroom, messege) {
     try {
-        if (getAuth().currentUser) {
-            const userID = await getAuth().currentUser.uid;
-            
+        if (isUserSignedIn()) {
+            const userID = getUserID()
             const chatroomRef = collection(getFirestore(), `public-chatrooms/${CHATROOMS}/${chatroom}`);
             await addDoc(chatroomRef, {
                 message: messege,
@@ -126,33 +176,59 @@ export async function postMessage(chatroom, messege) {
         }
     }
     catch(error) {
-      console.error('Error saving shopping cart database', error);
+      console.error('Error posting message', error);
     }
 }
 
 export async function saveUser() {
     // Create a database of user profile data
     try {
-        if (getAuth().currentUser) {
-            const userID = await getAuth().currentUser.uid;
+        if (isUserSignedIn()) {
+            const userID = getUserID();
+            const userObj = getUserObj()
             const userStoreRef = collection(getFirestore(), 'users');
             await setDoc(doc(userStoreRef, userID), {
-                name: getAuth().currentUser.displayName,
-                pic: getAuth().currentUser.photoURL,
-            });    
+                name: userObj.displayName,
+                pic: userObj.photoURL,
+                lastUpdated: serverTimestamp(),
+            });
         }
     }
     catch(error) {
-      console.error('Error saving shopping cart database', error);
+      console.error('Error saving user profile', error);
     }
 }
-
+const memoizeUsernames = [];
 export async function getUser(userID) {
+    if (!userID) {
+        return {
+            name: "Error",
+            pic: "",
+        }
+    }
+    const filteredMemo = memoizeUsernames.filter(e => e.uid === userID);
+    if (filteredMemo.length > 0) {
+        return filteredMemo[0];
+    }
     try {
-        const user = (await getDoc(doc(getFirestore(), 'users', userID))).data();
+        const userObj = (await getDoc(doc(getFirestore(), 'users', userID))).data();
+        const user = {
+                name: userObj.name,
+                pic: userObj.pic,
+                uid: userID,
+            }
+        memoizeUsernames.push(user);
+        if (memoizeUsernames.length > 100) {
+            memoizeUsernames.shift();
+        }
         return user;
     }
     catch(error) {
         console.error('Error retrieving user data', error);
     }
+}
+
+const mockDate = {
+    "seconds": 1686374572,
+    "nanoseconds": 525000000
 }

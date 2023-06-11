@@ -4,6 +4,9 @@ import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import '../node_modules/react-chat-elements/dist/main.css'
 import { saveUser } from '../utils/storageManager';
+import Layout from '../components/layout';
+import { Context } from '../context/context';
+import Initializer from '../components/initializer';
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -24,11 +27,16 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 export default function App({ Component, pageProps }) {
+  
   saveUser();
   return (
-    <div className="px-3">
-        <link rel="stylesheet" href="https://rsms.me/inter/inter.css"></link>
-        <Component {...pageProps} />
-    </div>
+    <Context>
+      <Initializer>
+        <Layout>
+            <link rel="stylesheet" href="https://rsms.me/inter/inter.css"></link>
+            <Component {...pageProps} />
+        </Layout>
+      </Initializer>
+    </Context>
   );
 }

@@ -14,7 +14,7 @@ export default function Home() {
   const [squareImages, setSquareImages] = useState(getSquareImages());
 
   return (
-    <Layout>
+    <div>
       <main className="flex flex-col">
         <h1 className="text-3xl font-bold my-3">The human-AI social interface</h1>
         <Carousel />
@@ -30,6 +30,6 @@ export default function Home() {
         direction={"right"}
         />
       </main>
-    </Layout>
+    </div>
   );
 }

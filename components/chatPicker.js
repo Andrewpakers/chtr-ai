@@ -1,13 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import ChatroomTile from './chatPicker/chatroomTile';
 import { getAllChats, getMessages } from '../utils/storageManager';
+import { chatContext, chatroomListContext } from '../context/context';
+import { initChat } from '../utils/chatUtils';
 
 
 
-function ChatListBuilder({ chatrooms, setTempActiveChat }) {
+function ChatListBuilder({ chatrooms, setActiveChat }) {
     const chattiles = chatrooms?.map((chatroom) => {
         return (
-            <li key={chatroom?.id} onClick={() => setTempActiveChat(chatroom?.name)} >
+            <li className='' key={chatroom?.id} onClick={() => setActiveChat(chatroom?.name)} >
                 <ChatroomTile title={chatroom?.name} lastMessage={chatroom?.message} />
             </li>
         );
@@ -20,62 +22,44 @@ function ChatListBuilder({ chatrooms, setTempActiveChat }) {
     );
 }
 
-//retrieves list of chatrooms from DB, then queries the latest message in each room
-//Then creates an object with that information that can used to render ChatTiles
-async function updateChatroomList(setChatrooms) {
-    const chatlistObjs = [];
-    const chatrooms = await getAllChats();
-    for (let i = 0; i < chatrooms.length; i++) {
-        const message = await getMessages(chatrooms[i], undefined, 1);
-        chatlistObjs.push(
-            {
-                name: chatrooms[i],
-                message: message[0].message,
-                id: message[0].id,
-            }
-        );
-    }
-    setChatrooms(chatlistObjs);
-}
-
-export default function ChatPicker({ setActiveChat }) {
-    const [chatrooms, setChatrooms] = useState([]);
-    const [tempActiveChat, setTempActiveChat] = useState("");
+export default function ChatPicker() {
+    /**
+     * for some reason updating context directly in an onClick
+     * causes an infinite loop. So there must be an in-between state
+     * that then updates context in a useEffect
+     */
+    const [activeChat, setActiveChat] = useContext(chatContext);
+    const [tempActiveChat, setTempActiveChat] = useState(activeChat);
+    const [chatrooms, setChatrooms] = useContext(chatroomListContext);
 
     useEffect(() => {
-        // remove line below and uncomment other line to simulate db retrieval
-        // updateChatroomList(setChatrooms);
-        setChatrooms(mockChatrooms)
+        // initChat(setActiveChat, setChatrooms);
     }, []);
     useEffect(() => {
-        // This is a workaround for a bug that occurs when trying to setActiveChat directly onClick
-        // I'm not sure why this works, but it does
-        setActiveChat(tempActiveChat);
-    }, [tempActiveChat])
-
+        setActiveChat(tempActiveChat)
+    }, [tempActiveChat]);
     return (
-        <div className='w-[300px] min-w-[300px] h-[600px] border-r-2 border-slate-200'>
-            {/* to reproduce bug, set setTempActiveChat prop to setActiveChat */}
-            <ChatListBuilder setTempActiveChat={setTempActiveChat} chatrooms={chatrooms} />
+        <div className='w-[300px] min-w-[300px] h-[650px] border-r-2 border-slate-200'>
+            <ChatListBuilder setActiveChat={setTempActiveChat} chatrooms={chatrooms} />
         </div>
     );
 }
 
 //Mock chatroom data
- const mockChatrooms = [
-    {
-        "name": "test-room-1",
-        "message": 29,
-        "id": "uWTSTbvZvPt3myAST96x"
-    },
-    {
-        "name": "test-room-2",
-        "message": "this is the second chat room",
-        "id": "testroom-message-2"
-    },
-    {
-        "name": "test room 3",
-        "message": "This is a super long message so that we make sure the string is properly truncated",
-        "id": "test-message-42"
-    }
-]
+//  const mockChatrooms = [
+//     {
+//         "name": "test-room-1",
+//         "message": 29,
+//         "id": "uWTSTbvZvPt3myAST96x"
+//     },
+//     {
+//         "name": "test-room-2",
+//         "message": "this is the second chat room",
+//         "id": "testroom-message-2"
+//     },
+//     {
+//         "name": "test room 3",
+//         "message": "This is a super long message so that we make sure the string is properly truncated",
+//         "id": "test-message-42"
+//     }
+// ]

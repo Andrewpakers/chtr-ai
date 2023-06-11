@@ -2,6 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* html {
-  background-color: black;
-} */
+body {
+  padding-left: 8px;
+  padding-right: 8px;
+}
