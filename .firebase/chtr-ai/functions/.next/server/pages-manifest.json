@@ -1,0 +1,11 @@
+{
+  "/_app": "pages/_app.js",
+  "/chat": "pages/chat.html",
+  "/": "pages/index.html",
+  "/site/about": "pages/site/about.html",
+  "/_error": "pages/_error.js",
+  "/site/contact": "pages/site/contact.html",
+  "/site/licensing": "pages/site/licensing.html",
+  "/_document": "pages/_document.js",
+  "/404": "pages/404.html"
+}

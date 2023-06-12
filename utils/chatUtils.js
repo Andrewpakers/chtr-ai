@@ -1,4 +1,4 @@
-import { getAllChats, getMessages } from '../utils/storageManager';
+import { getAllChats, getMessages, getMessagesForAllChats, subChatroom } from '../utils/storageManager';
 
 //retrieves list of chatrooms from DB, then queries the latest message in each room
 //Then creates an object with that information that can used to render ChatTiles
@@ -24,7 +24,26 @@ export async function initChat(setActiveChat, setChatrooms) {
         .then((value) => setActiveChat(value[0]?.name), (err) => console.error("Couldn't identify default chat", err));
 }
 
-export async function initMessages() {
+export async function initMessages(messages, setMessages, chatrooms, updateMessages, messagesRef) {
+    if (messages.length === 0) {
+        for (let i = 0; i < chatrooms.length; i++) {
+            // Use new getMessagesForAllChats
+            getMessagesForAllChats(chatrooms)
+                .then((value) => {
+                    setMessages(value);
+            }, (err) => console.error("Couldn't retrieve messages", err))
+        }
+        subChatroom(chatrooms, updateMessages, messagesRef.current);
+    }
+}
 
+export async function updateAllMessages(setMessages, chatrooms,) {
+    for (let i = 0; i < chatrooms.length; i++) {
+        // Use new getMessagesForAllChats
+        getMessagesForAllChats(chatrooms)
+            .then((value) => {
+                setMessages(value);
+        }, (err) => console.error("Couldn't retrieve messages", err))
+    }
 }
 

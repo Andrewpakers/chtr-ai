@@ -1,0 +1,64 @@
+[debug] [2023-06-12T03:29:53.858Z] ----------------------------------------------------------------------
+[debug] [2023-06-12T03:29:53.859Z] Command:       /Users/anakers/.nvm/versions/node/v18.13.0/bin/node /Users/anakers/.nvm/versions/node/v18.13.0/bin/firebase deploy
+[debug] [2023-06-12T03:29:53.860Z] CLI Version:   11.30.0
+[debug] [2023-06-12T03:29:53.860Z] Platform:      darwin
+[debug] [2023-06-12T03:29:53.860Z] Node Version:  v18.13.0
+[debug] [2023-06-12T03:29:53.861Z] Time:          Sun Jun 11 2023 23:29:53 GMT-0400 (Eastern Daylight Time)
+[debug] [2023-06-12T03:29:53.861Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2023-06-12T03:29:53.894Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2023-06-12T03:29:53.894Z] > authorizing via signed-in user (andrewpakers@gmail.com)
+[debug] [2023-06-12T03:29:53.894Z] [iam] checking project chtr-ai for permissions ["datastore.indexes.create","datastore.indexes.delete","datastore.indexes.list","datastore.indexes.update","firebase.projects.get","firebasehosting.sites.update"]
+[debug] [2023-06-12T03:29:53.895Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/chtr-ai:testIamPermissions [none]
+[debug] [2023-06-12T03:29:53.895Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/chtr-ai:testIamPermissions x-goog-quota-user=projects/chtr-ai
+[debug] [2023-06-12T03:29:53.895Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/chtr-ai:testIamPermissions {"permissions":["datastore.indexes.create","datastore.indexes.delete","datastore.indexes.list","datastore.indexes.update","firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2023-06-12T03:29:54.169Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/chtr-ai:testIamPermissions 200
+[debug] [2023-06-12T03:29:54.169Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/chtr-ai:testIamPermissions {"permissions":["datastore.indexes.create","datastore.indexes.delete","datastore.indexes.list","datastore.indexes.update","firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2023-06-12T03:29:54.171Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/chtr-ai [none]
+[debug] [2023-06-12T03:29:54.403Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/chtr-ai 200
+[debug] [2023-06-12T03:29:54.403Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/chtr-ai {"projectId":"chtr-ai","projectNumber":"278233786948","displayName":"chtr-ai","name":"projects/chtr-ai","resources":{"hostingSite":"chtr-ai"},"state":"ACTIVE","etag":"1_83f0ea2a-0f44-4844-b8e4-6bb44e2304a6"}
+[debug] [2023-06-12T03:29:55.573Z] >>> [apiv2][query] GET https://firebasehosting.googleapis.com/v1beta1/projects/chtr-ai/sites pageToken=&pageSize=10
+[debug] [2023-06-12T03:29:56.110Z] <<< [apiv2][status] GET https://firebasehosting.googleapis.com/v1beta1/projects/chtr-ai/sites 200
+[debug] [2023-06-12T03:29:56.110Z] <<< [apiv2][body] GET https://firebasehosting.googleapis.com/v1beta1/projects/chtr-ai/sites {"sites":[{"name":"projects/chtr-ai/sites/chtr-ai","defaultUrl":"https://chtr-ai.web.app","appId":"1:278233786948:web:58e13b66dfba0783d9aa11","type":"DEFAULT_SITE"}]}
+[debug] [2023-06-12T03:29:56.111Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/-/webApps/1:278233786948:web:58e13b66dfba0783d9aa11/config [none]
+[debug] [2023-06-12T03:29:56.758Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/-/webApps/1:278233786948:web:58e13b66dfba0783d9aa11/config 200
+[debug] [2023-06-12T03:29:56.758Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/-/webApps/1:278233786948:web:58e13b66dfba0783d9aa11/config {"projectId":"chtr-ai","appId":"1:278233786948:web:58e13b66dfba0783d9aa11","storageBucket":"chtr-ai.appspot.com","apiKey":"AIzaSyAHS_X7Q1rULMSCbM4cfnEW2PAHHfbXxqo","authDomain":"chtr-ai.firebaseapp.com","messagingSenderId":"278233786948","measurementId":"G-499B3ET4X6"}
+[debug] [2023-06-12T03:30:17.852Z] Error: Command failed: npm i --omit dev --no-audit
+    at checkExecSyncError (node:child_process:885:11)
+    at execSync (node:child_process:957:15)
+    at prepareFrameworks (/Users/anakers/.nvm/versions/node/v18.13.0/lib/node_modules/firebase-tools/lib/frameworks/index.js:326:42)
+    at async deploy (/Users/anakers/.nvm/versions/node/v18.13.0/lib/node_modules/firebase-tools/lib/deploy/index.js:55:13)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2023-06-12T03:33:27.757Z] ----------------------------------------------------------------------
+[debug] [2023-06-12T03:33:27.758Z] Command:       /Users/anakers/.nvm/versions/node/v18.13.0/bin/node /Users/anakers/.nvm/versions/node/v18.13.0/bin/firebase deploy --only hosting
+[debug] [2023-06-12T03:33:27.758Z] CLI Version:   11.30.0
+[debug] [2023-06-12T03:33:27.758Z] Platform:      darwin
+[debug] [2023-06-12T03:33:27.758Z] Node Version:  v18.13.0
+[debug] [2023-06-12T03:33:27.759Z] Time:          Sun Jun 11 2023 23:33:27 GMT-0400 (Eastern Daylight Time)
+[debug] [2023-06-12T03:33:27.759Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2023-06-12T03:33:27.793Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2023-06-12T03:33:27.794Z] > authorizing via signed-in user (andrewpakers@gmail.com)
+[debug] [2023-06-12T03:33:27.794Z] [iam] checking project chtr-ai for permissions ["firebase.projects.get","firebasehosting.sites.update"]
+[debug] [2023-06-12T03:33:27.795Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/chtr-ai:testIamPermissions [none]
+[debug] [2023-06-12T03:33:27.795Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/chtr-ai:testIamPermissions x-goog-quota-user=projects/chtr-ai
+[debug] [2023-06-12T03:33:27.795Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/chtr-ai:testIamPermissions {"permissions":["firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2023-06-12T03:33:28.006Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/chtr-ai:testIamPermissions 200
+[debug] [2023-06-12T03:33:28.007Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/chtr-ai:testIamPermissions {"permissions":["firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2023-06-12T03:33:28.007Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/chtr-ai [none]
+[debug] [2023-06-12T03:33:29.403Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/chtr-ai 200
+[debug] [2023-06-12T03:33:29.404Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/chtr-ai {"projectId":"chtr-ai","projectNumber":"278233786948","displayName":"chtr-ai","name":"projects/chtr-ai","resources":{"hostingSite":"chtr-ai"},"state":"ACTIVE","etag":"1_17696b97-fdc9-4366-b054-da27f8731393"}
+[debug] [2023-06-12T03:33:30.633Z] >>> [apiv2][query] GET https://firebasehosting.googleapis.com/v1beta1/projects/chtr-ai/sites pageToken=&pageSize=10
+[debug] [2023-06-12T03:33:31.297Z] <<< [apiv2][status] GET https://firebasehosting.googleapis.com/v1beta1/projects/chtr-ai/sites 200
+[debug] [2023-06-12T03:33:31.297Z] <<< [apiv2][body] GET https://firebasehosting.googleapis.com/v1beta1/projects/chtr-ai/sites {"sites":[{"name":"projects/chtr-ai/sites/chtr-ai","defaultUrl":"https://chtr-ai.web.app","appId":"1:278233786948:web:58e13b66dfba0783d9aa11","type":"DEFAULT_SITE"}]}
+[debug] [2023-06-12T03:33:31.298Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/-/webApps/1:278233786948:web:58e13b66dfba0783d9aa11/config [none]
+[debug] [2023-06-12T03:33:31.854Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/-/webApps/1:278233786948:web:58e13b66dfba0783d9aa11/config 200
+[debug] [2023-06-12T03:33:31.854Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/-/webApps/1:278233786948:web:58e13b66dfba0783d9aa11/config {"projectId":"chtr-ai","appId":"1:278233786948:web:58e13b66dfba0783d9aa11","storageBucket":"chtr-ai.appspot.com","apiKey":"AIzaSyAHS_X7Q1rULMSCbM4cfnEW2PAHHfbXxqo","authDomain":"chtr-ai.firebaseapp.com","messagingSenderId":"278233786948","measurementId":"G-499B3ET4X6"}
+[debug] [2023-06-12T03:33:41.735Z] Error: Command failed: npm i --omit dev --no-audit
+    at checkExecSyncError (node:child_process:885:11)
+    at execSync (node:child_process:957:15)
+    at prepareFrameworks (/Users/anakers/.nvm/versions/node/v18.13.0/lib/node_modules/firebase-tools/lib/frameworks/index.js:326:42)
+    at async deploy (/Users/anakers/.nvm/versions/node/v18.13.0/lib/node_modules/firebase-tools/lib/deploy/index.js:55:13)
+[error] 
+[error] Error: An unexpected error has occurred.

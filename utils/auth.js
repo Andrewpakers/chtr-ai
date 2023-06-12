@@ -8,11 +8,19 @@ import {
   } from "firebase/auth";
 
 export function subSignIn(callback) {
+  const callbackArray = []
+  if (callbackArray.indexOf(callback) === -1) {
+    callbackArray.push(callback);
+  }
   onAuthStateChanged(getAuth(), (user) => {
     if (user) {
-      callback(true);
+      callbackArray.forEach(callbackFn => {
+        callbackFn(true);
+      });
     } else {
-      callback(false);
+      callbackArray.forEach(callbackFn => {
+        callbackFn(false);
+      });
     }
   });
 }

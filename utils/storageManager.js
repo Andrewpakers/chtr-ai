@@ -122,7 +122,45 @@ export async function getMessages(chatroom, dateArg, limitArg = 20) {
     return messageArray;
 }
 
-export async function subChatroom(chatrooms, callback, messages) {
+// This is for getting messages for a list of chatrooms
+export async function getMessagesForAllChats(chatrooms, limitArg = 50) {
+    if (!chatrooms) {
+        return [];
+    }
+    // set date
+    const date = await getCurrentServerTime();
+    //cycle through all messages and build array
+    const allMessageArray = [];
+    for (let i = 0; i < chatrooms.length; i++) {
+        //retrieve doc
+        const q = query(collection(getFirestore(), `public-chatrooms/${CHATROOMS}/${chatrooms[i].name}`), where("posted", "<", date), orderBy('posted', 'desc'), limit(limitArg));    
+        let querySnapshot;
+        try {
+            querySnapshot = await getDocs(q);
+        }
+        catch(error) {
+            console.error('Error retrieving messages', error);
+        }
+        // create array of message objects
+        const messageArray = [];
+        const userID = getUserID();
+        for (let i = 0; i < querySnapshot.docs.length; i++) {
+            const docObj = querySnapshot.docs[i].data();
+            const messageObj = await formatMessage(docObj, querySnapshot.docs[i].id, userID);
+            messageArray.unshift(messageObj)
+        }
+        // create object for chatroom + messages
+        // push to array for all chatroom/message objects
+        allMessageArray.push({
+            chatroom: chatrooms[i].name,
+            messages: messageArray,
+        });
+    }
+
+    return allMessageArray;
+}
+
+export async function subChatroom(chatrooms, callback) {
     // const q = query(collection(db, "cities"), where("state", "==", "CA"));
     /**
      * todo: New messages needs to convert messages into the right format
