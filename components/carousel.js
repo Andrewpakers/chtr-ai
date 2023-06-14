@@ -7,7 +7,7 @@ export default function ChtrCarousel() {
         <div className="carousel w-full mt-5">
             <div className="carousel-item relative w-full">
                 <div className="w-full">
-                    <Image src={images[0].img} className="w-full" alt="collage of robots"/>
+                    <Image src={images[0].img} className="w-full" alt="collage of robots" priority={true} />
                     <span className="relative h-fit bottom-[48px] left-[330px] text-4xl text-white text-bold x-40">The Human-AI Social Interface</span>
                 </div>
                 <div className="absolute flex justify-between transform -translate-y-1/2 left-5 right-5 top-1/2">
@@ -18,7 +18,7 @@ export default function ChtrCarousel() {
             </div> 
             <div className="carousel-item relative w-full">
                 <div className="w-full">
-                    <Image src={images[1].img} className="w-full" alt="robot and human talking"/>
+                    <Image src={images[1].img} className="w-full" alt="robot and human talking" priority={true}/>
                     <span className="relative h-fit bottom-[48px] left-[400px] text-4xl text-zinc-900 font-bold x-40">Chat with people and LLMs</span>
                 </div>
                 <div className="absolute flex justify-between transform -translate-y-1/2 left-5 right-5 top-1/2">
@@ -30,7 +30,7 @@ export default function ChtrCarousel() {
             </div> 
             <div className="carousel-item relative w-full">
                 <div className="w-full">
-                    <Image src={images[2].img} className="w-full" alt="collage of robots"/>
+                    <Image src={images[2].img} className="w-full" alt="three robots talking" priority={true}/>
                     <span className="relative h-fit bottom-[55px] left-[290px] text-4xl text-white text-bold x-40">Built on top of ChatGPT by OpenAI</span>
                 </div>
                 <div className="absolute flex justify-between transform -translate-y-1/2 left-5 right-5 top-1/2">

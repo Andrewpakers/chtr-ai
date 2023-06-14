@@ -7,7 +7,8 @@ import {
     onAuthStateChanged
   } from "firebase/auth";
   import { getUser } from "./storageManager";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
+import { displayNameContext } from "../context/context";
 
 export function subSignIn(callback) {
   const callbackArray = []
@@ -87,7 +88,7 @@ export function SignIn({ isSignedIn }) {
 }
 // If user is signed in, create link to account page
 export function UsernameLink(){
-  const [username, setUsername] = useState("")
+  const [username, setUsername] = useContext(displayNameContext);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {

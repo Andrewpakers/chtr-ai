@@ -1,10 +1,11 @@
 import { isUserSignedIn, subSignIn, getUserName } from "../utils/auth";
 import { saveUser } from "../utils/storageManager";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
+import { displayNameContext } from "../context/context";
 
 export default function Profile() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [username, setUsername] = useState("");
+    const [username, setUsername] = useContext(displayNameContext);
     const [displaynameInput, setDisplaynameInput] = useState('');
 
     function authChangedState(value) {
@@ -23,14 +24,14 @@ export default function Profile() {
     }, [isLoggedIn]);
 
     function handleClick(evt) {
-        saveUser(displaynameInput);
+        saveUser(displaynameInput, setUsername);
         setDisplaynameInput("");
     }
 
     const handleKeyDown = (event) => {
         if (event.key === 'Enter') {
           // 👇 Get input value
-          saveUser(displaynameInput);
+          saveUser(displaynameInput, setUsername);
           setDisplaynameInput("");
         }
     };

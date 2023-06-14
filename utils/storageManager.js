@@ -220,7 +220,7 @@ export async function postMessage(chatroom, messege) {
     }
 }
 
-export async function saveUser(displayname) {
+export async function saveUser(displayname, setDisplayName) {
     // Create a database of user profile data
     try {
         if (isUserSignedIn()) {
@@ -234,11 +234,14 @@ export async function saveUser(displayname) {
                 updatedUserObj.pic = userObj.photoURL;
                 updatedUserObj.lastUpdated = serverTimestamp();
                 await setDoc(doc(userStoreRef, userID), updatedUserObj);
+                setDisplayName(userObj.displayName);
             } else if (displayname) {
                 updatedUserObj.name = displayname;
                 updatedUserObj.pic = userObj.photoURL;
                 updatedUserObj.lastUpdated = serverTimestamp();
+                updatedUserObj.customized = true;
                 await setDoc(doc(userStoreRef, userID), updatedUserObj);
+                setDisplayName(displayname);
             }
         }
     }

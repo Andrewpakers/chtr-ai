@@ -16,6 +16,8 @@ export const chatroomListContext = createContext(null);
  * 
  */
 export const messagesContext = createContext([]);
+//Handles displayname and updates on change
+export const displayNameContext = createContext('');
 
 export function Context({ children }) {
     //Handles the currently active chat
@@ -24,12 +26,16 @@ export function Context({ children }) {
     const [chatrooms, setChatrooms] = useState([]);
     //Handles preloading all the messages data
     const [messages, setMessages] = useState([]);
+    //Handles display name
+    const [displayName, setDisplayName] = useState('');
   
     return (
       <chatContext.Provider value={[ activeChat, setActiveChat ]}>
         <chatroomListContext.Provider value={[chatrooms, setChatrooms]}>
             <messagesContext.Provider value={[messages, setMessages]}>
-              {children}
+              <displayNameContext.Provider value={[displayName, setDisplayName]}>
+                {children}
+              </displayNameContext.Provider>
             </messagesContext.Provider>
         </chatroomListContext.Provider>
       </chatContext.Provider>

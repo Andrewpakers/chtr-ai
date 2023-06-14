@@ -73,7 +73,8 @@ export default function Layout ({children}) {
               height={'auto'}
               className="mr-4"
               alt="Chtr.ai Logo"
-              priority={true}
+              // priority={true}
+              placeholder="blur"
               />
               <span className="self-center whitespace-nowrap text-xl font-semibold dark:text-white">
               Chtr.ai
