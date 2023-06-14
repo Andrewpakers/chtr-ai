@@ -2,7 +2,7 @@ import { Html, Head, Main, NextScript } from 'next/document'
  
 export default function Document() {
   return (
-    <Html data-theme="corporate">
+    <Html data-theme="retro">
       <Head />
       <body>
         <Main />

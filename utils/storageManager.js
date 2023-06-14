@@ -220,18 +220,26 @@ export async function postMessage(chatroom, messege) {
     }
 }
 
-export async function saveUser() {
+export async function saveUser(displayname) {
     // Create a database of user profile data
     try {
         if (isUserSignedIn()) {
             const userID = getUserID();
             const userObj = getUserObj()
             const userStoreRef = collection(getFirestore(), 'users');
-            await setDoc(doc(userStoreRef, userID), {
-                name: userObj.displayName,
-                pic: userObj.photoURL,
-                lastUpdated: serverTimestamp(),
-            });
+            const currentData = await getDoc(doc(collection(getFirestore(), 'users'), userID));
+            const updatedUserObj = {}
+            if (currentData.data().customized !== true && !displayname) {
+                updatedUserObj.name = userObj.displayName;
+                updatedUserObj.pic = userObj.photoURL;
+                updatedUserObj.lastUpdated = serverTimestamp();
+                await setDoc(doc(userStoreRef, userID), updatedUserObj);
+            } else if (displayname) {
+                updatedUserObj.name = displayname;
+                updatedUserObj.pic = userObj.photoURL;
+                updatedUserObj.lastUpdated = serverTimestamp();
+                await setDoc(doc(userStoreRef, userID), updatedUserObj);
+            }
         }
     }
     catch(error) {

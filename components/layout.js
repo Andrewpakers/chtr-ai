@@ -37,7 +37,7 @@ export default function Layout ({children}) {
     }
 
     return (
-    <div className="max-w-4xl mx-auto bg-white text-slate-950">
+    <div className="max-w-4xl mx-auto bg-transparent text-slate-950">
         <Head>
             <title>Chtr.ai</title>
             <link rel="icon" href="/favicon.ico" />

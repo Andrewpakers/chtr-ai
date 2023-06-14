@@ -6,6 +6,8 @@ import {
     signOut,
     onAuthStateChanged
   } from "firebase/auth";
+  import { getUser } from "./storageManager";
+import { useEffect, useState } from "react";
 
 export function subSignIn(callback) {
   const callbackArray = []
@@ -39,9 +41,10 @@ export function signOutUser() {
     signOut(getAuth());
 }
 // Returns the signed-in user's display name.
-export function getUserName() {
+export async function getUserName() {
     if (isUserSignedIn()) {
-      return getAuth().currentUser.displayName;
+      const userObj = await getUser(getAuth().currentUser.uid);
+      return userObj.name
     } 
     return null;
 }
@@ -68,7 +71,7 @@ export function SignIn({ isSignedIn }) {
     if (isSignedIn) {
       return (
         <div >
-            <button className="btn btn-ghost" type="button" onClick={signOutUser}>
+            <button className="btn btn-secondary" type="button" onClick={signOutUser}>
               Sign Out
             </button>
         </div>
@@ -84,13 +87,31 @@ export function SignIn({ isSignedIn }) {
 }
 // If user is signed in, create link to account page
 export function UsernameLink(){
-      if (isUserSignedIn) {
-          return (
-              <Link href="/">
-                      {getUserName()}
-              </Link>
-          );
-      } else {
-          return null;
-      }
+  const [username, setUsername] = useState("")
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    setIsLoggedIn(isUserSignedIn());
+    subSignIn(authChangedState);
+  }, []);
+
+  useEffect(() => {
+    getUserName().then((value) => {
+      setUsername(value);
+    }, (err) => {console.error(err)});
+  }, [isLoggedIn]);
+
+  function authChangedState(value) {
+    setIsLoggedIn(value);
+}
+
+  if (isLoggedIn) {
+      return (
+          <Link href="/profile">
+                  {username}
+          </Link>
+      );
+  } else {
+      return null;
+  }
 }

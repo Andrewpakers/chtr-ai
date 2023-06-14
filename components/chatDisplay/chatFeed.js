@@ -33,9 +33,11 @@ export default function ChatFeed() {
     const [activeChat, setActiveChat] = useContext(chatContext);
     const [messages, setMessages] = useContext(messagesContext);
     
+
     // autoscrolls to bottom when chatroom is changed
     useEffect(() => {
         anchorRef.current.scrollIntoView();
+        window.scrollTo(0,0);
     }, [activeChat])
 
     //auto-scrolls to the bottom when a new message is posted
@@ -48,6 +50,7 @@ export default function ChatFeed() {
             messages.at(-1).position === 'right') {
 
             anchorRef.current.scrollIntoView();
+            window.scrollTo(0,0);
         }
     }, [messages])
 
