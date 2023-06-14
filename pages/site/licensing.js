@@ -2,7 +2,7 @@ import Layout from "../../components/layout";
 
 export default function Licensing() {
     return (
-        <Layout>
+        <div>
             <p className="font-bold my-3">Chtr.ai uses the MIT license.</p>
             <p className="mb-3">
             Copyright 2023, Andrew Akers
@@ -16,6 +16,6 @@ export default function Licensing() {
             <p className="mb-3">
             THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             </p>
-        </Layout>
+        </div>
     );
 }
