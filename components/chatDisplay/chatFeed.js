@@ -1,5 +1,5 @@
 import { useEffect, useRef, useContext } from "react";
-import { MessageBox } from "react-chat-elements";
+import MessageBox from "./chatFeed/messageBox";
 import { messagesContext, chatContext } from "../../context/context";
 
 function MessageList({ messages, activeChat }) {
@@ -10,6 +10,7 @@ function MessageList({ messages, activeChat }) {
             break
         }
     }
+    useEffect(() => console.log(activeChatMessages), [messages]);
     if (activeChatMessages.length > 0) {
         return (
             activeChatMessages.map((message) => {
@@ -42,7 +43,7 @@ export default function ChatFeed() {
     const anchorRef = useRef(null);
     const feedRef = useRef(null);
     useEffect(() => {
-        if (feedRef.current.scrollHeight - feedRef.current.scrollTop <= 680 || 
+        if (feedRef.current.scrollHeight - feedRef.current.scrollTop <= 690 || 
             feedRef.current.scrollTop === 0 ||
             messages.at(-1).position === 'right') {
 
@@ -50,8 +51,10 @@ export default function ChatFeed() {
         }
     }, [messages])
 
+
+
     return (
-        <div ref={feedRef} className="max-h-[595px] w-full bg-slate-300 p-0 overflow-y-scroll">
+        <div ref={feedRef} className="h-[595px] w-full p-0 overflow-y-scroll">
             <MessageList messages={messages} activeChat={activeChat} />
             <div ref={anchorRef} />
         </div>

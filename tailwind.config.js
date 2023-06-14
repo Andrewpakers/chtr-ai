@@ -2,8 +2,6 @@
 const defaultTheme = require('tailwindcss/defaultTheme')
 module.exports = {
   content: [
-    "./node_modules/flowbite-react/**/*.js",
-    "./node_modules/flowbite/**/*.js",
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
@@ -18,8 +16,41 @@ module.exports = {
     },
   },
   plugins: [
-    require("flowbite/plugin")
+    require("daisyui")
   ],
   darkMode: 'class',
+  daisyui: {
+    themes: [
+      "light",
+      "dark",
+      "cupcake",
+      "bumblebee",
+      "emerald",
+      "corporate",
+      "synthwave",
+      "retro",
+      "cyberpunk",
+      "valentine",
+      "halloween",
+      "garden",
+      "forest",
+      "aqua",
+      "lofi",
+      "pastel",
+      "fantasy",
+      "wireframe",
+      "black",
+      "luxury",
+      "dracula",
+      "cmyk",
+      "autumn",
+      "business",
+      "acid",
+      "lemonade",
+      "night",
+      "coffee",
+      "winter",
+    ],
+  },
 }
 

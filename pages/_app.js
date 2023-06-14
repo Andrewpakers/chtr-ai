@@ -2,7 +2,6 @@ import '../styles/globals.css';
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
-import '../node_modules/react-chat-elements/dist/main.css'
 import { saveUser } from '../utils/storageManager';
 import Layout from '../components/layout';
 import { Context } from '../context/context';

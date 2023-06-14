@@ -6,10 +6,14 @@ import { initChat } from '../utils/chatUtils';
 
 
 
-function ChatListBuilder({ chatrooms, setActiveChat }) {
+function ChatListBuilder({ chatrooms, setActiveChat, activeChat }) {
     const chattiles = chatrooms?.map((chatroom) => {
+        let isSelected = false;
+        if(chatroom.name === activeChat) {
+            isSelected = true;
+        }
         return (
-            <li className='' key={chatroom?.id} onClick={() => setActiveChat(chatroom?.name)} >
+            <li className={isSelected ? 'bg-blue-100' : ''} key={chatroom?.id} onClick={() => setActiveChat(chatroom?.name)} >
                 <ChatroomTile title={chatroom?.name} lastMessage={chatroom?.message} />
             </li>
         );
@@ -33,14 +37,11 @@ export default function ChatPicker() {
     const [chatrooms, setChatrooms] = useContext(chatroomListContext);
 
     useEffect(() => {
-        // initChat(setActiveChat, setChatrooms);
-    }, []);
-    useEffect(() => {
         setActiveChat(tempActiveChat)
     }, [tempActiveChat]);
     return (
         <div className='w-[300px] min-w-[300px] h-[650px] border-r-2 border-slate-200'>
-            <ChatListBuilder setActiveChat={setTempActiveChat} chatrooms={chatrooms} />
+            <ChatListBuilder activeChat={activeChat} setActiveChat={setTempActiveChat} chatrooms={chatrooms} />
         </div>
     );
 }

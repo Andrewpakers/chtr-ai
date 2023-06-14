@@ -1,4 +1,4 @@
-import { Navbar, Button } from "flowbite-react";
+import Link from "next/link";
 import {
     getAuth,
     GoogleAuthProvider,
@@ -68,17 +68,17 @@ export function SignIn({ isSignedIn }) {
     if (isSignedIn) {
       return (
         <div >
-            <Button type="button" onClick={signOutUser}>
+            <button className="btn btn-ghost" type="button" onClick={signOutUser}>
               Sign Out
-            </Button>
+            </button>
         </div>
       );
     }
     return (
       <div >
-        <Button type="button" onClick={signIn}>
+        <button className="btn btn-ghost" type="button" onClick={signIn}>
           Sign in
-        </Button>
+        </button>
       </div>
     );
 }
@@ -86,9 +86,9 @@ export function SignIn({ isSignedIn }) {
 export function UsernameLink(){
       if (isUserSignedIn) {
           return (
-              <Navbar.Link href="/">
+              <Link href="/">
                       {getUserName()}
-              </Navbar.Link>
+              </Link>
           );
       } else {
           return null;

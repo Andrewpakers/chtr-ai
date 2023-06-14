@@ -1,12 +1,11 @@
-import { Button } from "react-chat-elements";
 
 export default function ChatInput({ inputRef, handleInput, messageInput }) {
 
     return (
         <div className="flex w-full h-fit py-3">
-            <div className='w-full h-fit mr-3 mb-0'>
+            <div className='w-full h-fit mr-3 mb-0 pl-2'>
                 <textarea
-                className=" w-full h-[30px] resize-none border-none focus:outline-none border-transparent focus:border-transparent focus:ring-0"
+                className="input input-bordered input-sm w-full bg-transparent resize-none"
                 value={messageInput}
                 referance={inputRef}
                 placeholder="Type here..."
@@ -14,9 +13,10 @@ export default function ChatInput({ inputRef, handleInput, messageInput }) {
                 />
             </div>
             <div className='mt-auto mb-[6px] mr-2'>
-                <Button className='w-20 mt-auto' text={"Send"} onClick={handleInput} title="Send" />
+                <button className='w-20 btn btn-sm h-[34px] btn-primary' onClick={handleInput} title="Send">
+                    Send
+                </button>
             </div>
         </div>
     );
 }
-

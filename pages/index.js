@@ -16,7 +16,6 @@ export default function Home() {
   return (
     <div>
       <main className="flex flex-col">
-        <h1 className="text-3xl font-bold my-3">The human-AI social interface</h1>
         <Carousel />
         <Blade 
         image={squareImages[0]}
