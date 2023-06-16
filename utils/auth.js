@@ -108,8 +108,9 @@ export function UsernameLink(){
 
   if (isLoggedIn) {
       return (
-          <Link href="/profile">
-                  {username}
+          <Link href="/profile"
+          className="text-base-content">
+                  Profile
           </Link>
       );
   } else {

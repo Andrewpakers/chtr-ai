@@ -8,6 +8,7 @@ export default function Initializer({ children }) {
     const [chatrooms, setChatrooms] = useContext(chatroomListContext);
     const [messages, setMessages] = useContext(messagesContext);
     const [isLoggedIn, setIsLoggedIn] = useState();
+    const [unsubscribes, setUnsubscribes] = useState();
     const chatroomsRef = useRef();
     const messagesRef = useRef();
 
@@ -27,7 +28,7 @@ export default function Initializer({ children }) {
             }
         }
         // Update chatrooms to display latest message
-        const copyChatrooms = JSON.parse(JSON.stringify(chatroomsRef.current));
+        const copyChatrooms = structuredClone(chatroomsRef.current);
         copyChatrooms.forEach(element => {
             if (chatroom === element.name) {
                 element.message = newMessage.text;
@@ -47,14 +48,24 @@ export default function Initializer({ children }) {
         updateAllMessages(setMessages, chatrooms);
     }, [isLoggedIn]);
 
+
     // Subs to each chatroom in order to display new messages
     useEffect(() => {
-        initMessages(messages, setMessages, chatrooms, updateMessages, messagesRef);
+        initMessages(messages, setMessages, chatrooms, updateMessages, messagesRef)
+            .then((value) => setUnsubscribes(value), (err) => console.error(err));
     }, [chatrooms]);
     // initialize chatroom list
     useEffect(() => {
         initChat(setActiveChat, setChatrooms);
         subSignIn(handleLogIn);
+        
+        return function cleanUp() {
+            if (Array.isArray(unsubscribes)) {
+                unsubscribes.forEach((unsubscribe) => {
+                    unsubscribe()
+                })
+            }
+        }
     }, []);
 
     return (

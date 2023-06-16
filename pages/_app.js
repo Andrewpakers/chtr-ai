@@ -32,8 +32,10 @@ export default function App({ Component, pageProps }) {
     <Context>
       <Initializer>
         <Layout>
-            <link rel="stylesheet" href="https://rsms.me/inter/inter.css"></link>
-            <Component {...pageProps} />
+            <div className='text-base-content'>
+              <link rel="stylesheet" href="https://rsms.me/inter/inter.css"></link>
+              <Component {...pageProps} />
+            </div>
         </Layout>
       </Initializer>
     </Context>

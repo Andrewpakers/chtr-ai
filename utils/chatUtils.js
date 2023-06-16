@@ -33,7 +33,8 @@ export async function initMessages(messages, setMessages, chatrooms, updateMessa
                     setMessages(value);
             }, (err) => console.error("Couldn't retrieve messages", err))
         }
-        subChatroom(chatrooms, updateMessages, messagesRef.current);
+        const unsubscribes = subChatroom(chatrooms, updateMessages, messagesRef.current);
+        return unsubscribes;
     }
 }
 

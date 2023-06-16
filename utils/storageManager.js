@@ -177,6 +177,8 @@ export async function subChatroom(chatrooms, callback) {
     }
     let time = await getCurrentServerTime();
 
+    const arrayOfUnscubscribe = [];
+
     for (let j = 0; j < chatrooms.length; j++) {
         const q = query(collection(getFirestore(), `public-chatrooms/${CHATROOMS}/${chatrooms[j].name}`), where("posted", ">", time), orderBy('posted', 'desc'));
         const unsubscribe = onSnapshot(q, async (querySnapshot) => {
@@ -190,7 +192,9 @@ export async function subChatroom(chatrooms, callback) {
                 callback(messageObj, chatrooms[j].name);
             }
         });
+        arrayOfUnscubscribe.push(unsubscribe);
     }
+    return arrayOfUnscubscribe;
 }
 
 /**
