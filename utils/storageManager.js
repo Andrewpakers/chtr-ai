@@ -71,7 +71,7 @@ export async function getAllChats() {
 
 export async function formatMessage(docObj, id, userID) {
     const authorDisplayName = (await getUser(docObj.author)).name;
-    const wrappedText = wrap(String(docObj.message), {cut: true});
+    const wrappedText = wrap(String(docObj.message));
     const messageObj = {
         type: 'text',
         title: authorDisplayName,
@@ -79,6 +79,9 @@ export async function formatMessage(docObj, id, userID) {
         posted: docObj.posted.toDate(),
         author: docObj.author,
         id: id,
+    }
+    if (docObj.hasOwnProperty('botMessage')) {
+        messageObj['botMessage'] = true;
     }
     if (docObj.author === userID) {
         messageObj.position = 'right';

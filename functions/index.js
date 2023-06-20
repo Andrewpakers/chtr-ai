@@ -1,49 +1,247 @@
 const functions = require("firebase-functions");
 const admin = require('firebase-admin')
-const { Firestore } = require("firebase-admin/firestore");
+const { Firestore, FieldValue } = require("firebase-admin/firestore");
 const { onDocumentCreated } = require('firebase-functions/v2/firestore');
+const { Configuration, OpenAIApi } = require("openai");
+const { findAllByDisplayValue } = require("@testing-library/react");
+require('dotenv').config();
+
+// TODO: track conversation √
+// TODO: build prompt √
+// TODO: query OpenAI API √
+// TODO: determine which bot to talk to √
+    // TODO: Put characterList in each chatroom
+// TODO: implement entropy √
+// TODO: implement system to prevent concurring function calls per chatroom √
+// TODO: fix prompt so the bot knows when it is talking to itself
+
+// Question? Why did I hit the rate limit?
 
 // constant that determines what collection to retrieve chatrooms.
 // "test" for test, "prod" for prod
 const CHATROOMS = "test";
 
 // Const that determines what masterlist to use for which chatrooms
-const CHATROOMSLIST = "testList"
+const CHATROOMSLIST = "testList";
 
-const administrator = admin.initializeApp();
+// Number of bot messages in a bot-only conversation
+const DEFAULT_ENTROPY = 5;
 
-// admin.initializeApp();
+admin.initializeApp();
 
-// exports.getUsername = functions.https.onRequest((request, response) => {
-//     admin.firestore().doc('users/coH8JrQCvvTEjhIVwmKaevohYnM2').get()
-//         .then(snapshot => {
-//             response.send(snapshot.data());
-//         })
-//         .catch(error => {
-//             console.error(error);
-//             response.status(500).send("There's been a problem...")
-//         })
-// });
-
-exports.onNewMessage = onDocumentCreated(`public-chatrooms/${CHATROOMS}/{chatroomId}/{messageId}`, (event) => {
+exports.onNewMessage = onDocumentCreated(`public-chatrooms/${CHATROOMS}/{chatroomId}/{messageId}`, async (event) => {
     const chatroom = event.params.chatroomId;
     const messageID = event.params.messageId;
     const messageObj = event.data.data();
 
-    console.log(chatroom, messageID, messageObj);
+    // Ignore utility files
+    if (messageID.charAt(0) === "!") {
+        return
+    }
 
-    if (!messageObj.hasOwnProperty('botMessage')) {
-        writeMessage('I heard you', chatroom, 'John');
+    // This is used to prevent concurrent function streams
+    const isActiveRef = admin.firestore().collection(`public-chatrooms/${CHATROOMS}/${chatroom}`)
+            .doc('!isActiveTracker');
+    let isActive = (await isActiveRef.get()).data()?.isActive;
+    if (isActive === null || isActive === undefined) {
+            isActive = false;
+    }
+    // exit function stream if it is active
+    if (isActive) {
+        const trackConvo = await trackConversation(messageObj, chatroom);
+        return
+    }
+    isActive = true;
+    try {
+        const updateIsActive = await isActiveRef.set({
+            isActive: isActive,
+        });
+    } catch (err) {
+        console.error('Failed to save isActive', err);
+    }
+
+    const conversation = await trackConversation(messageObj, chatroom);
+    const entropy = await trackEntropy(messageObj, chatroom);
+    if (conversation) {
+        if (entropy > 0 || entropy > 15) {
+            const nextTalker = await pickNextTalker(conversation, chatroom);
+            const prompt = await buildPrompt(nextTalker, conversation, entropy);
+            const response = await contactAIAPI(prompt);
+
+            isActive = false;
+            try {
+                const deactivateIsActive = await isActiveRef.set({
+                    isActive: isActive,
+                });
+            } catch (err) {
+                console.error('Failed to deactivate isActive', err);
+            }
+            writeMessage(response.content, chatroom, nextTalker);
+        }
     }
 
     return
-        // TODO: Decide if message is for an AI
-        // TODO: Fetch corresponding AI profile
-        // TODO: Compile information into a prompt for ChatGPT API
-        // TODO: Handle the AI response and add it back to Firestore
+
 });
 
+async function trackEntropy(messageObj, chatroom) {
+    // 10 bot messages per conversation
+    // entropy represents the number of bot messages left
+    // in a conversation.
+    // Entropy goes up when a user posts a message, and down when a bot
+    // posts a message
+    const entropyRef = admin.firestore().collection(`public-chatrooms/${CHATROOMS}/${chatroom}`)
+            .doc('!entropyTracker');
+    const previousEntropy = (await entropyRef.get()).data()?.entropy;
+    let currentEntropy;
+    console.log("previousEntropy", previousEntropy)
+    if (previousEntropy === NaN || previousEntropy === undefined || previousEntropy === null) {
+        currentEntropy = DEFAULT_ENTROPY;
+    } else if (previousEntropy === 0 && !messageObj.hasOwnProperty('botMessage')) {
+        currentEntropy = DEFAULT_ENTROPY;
+    } else {
+        currentEntropy = Number(previousEntropy);
+    }
+    if (messageObj.hasOwnProperty('botMessage')) {
+        currentEntropy -= 1;
+    } else {
+        currentEntropy += 1;
+    }
+    try {
+        const updateEntropy = await entropyRef.set({
+            entropy: currentEntropy,
+        });
+    } catch(err) {
+        console.error("Failed to save entropy:", err);
+    }
+    return currentEntropy;
+}
 
+async function pickNextTalker(conversation, chatroom) {
+    const messageObj = conversation.messages.at(-1);
+    // Retrieve the characterList
+    let characterList; 
+    try {
+        // If the chatroom doesn't have a characterList, retrieve the default one
+        characterList = (await admin.firestore().doc(`public-chatrooms/${CHATROOMS}/${chatroom}/CharacterList`).get()).data();
+        if (!characterList) {
+            characterList = (await admin.firestore().doc(`characters/CharacterList`).get()).data();
+        }
+    } catch (err) {
+        console.error(err);
+        return false
+    }
+    const characterArray = [];
+    if (characterList) {
+        for (const character in characterList) {
+            if (characterList[character] === true) {
+                if (messageObj.message?.includes(character) && messageObj.author !== character) {
+                    return character;
+                }
+                characterArray.push(character);
+            }
+        }
+    }
+    if (characterArray.length === 0) {
+        return false
+    }
+    let indexLastBot = 0;
+    for (let i = conversation.messages.length - 1; i > 0; i--) {
+        if (characterArray.includes(conversation.messages[i].author)) {
+            indexLastBot = characterArray.indexOf(conversation.messages[i].author) + 1;
+            if (indexLastBot >= characterArray.length) {
+                indexLastBot = 0;
+            }
+            break
+        }
+    }
+    return characterArray[indexLastBot];
+}
+
+async function trackConversation(messageObj, chatroom) {
+    try {
+        const conversationRef = admin.firestore().collection(`public-chatrooms/${CHATROOMS}/${chatroom}`)
+            .doc('!conversationTracker');
+        const currentConversation = await conversationRef.get()
+        const updatedConversation = {};
+        const userObj = await getUser(messageObj.author);
+        const msgWithName = messageObj;
+        msgWithName.author = userObj.name;
+        if (currentConversation.data() && Array.isArray(currentConversation.data().messages)) {
+            updatedConversation.messages = [...currentConversation.data().messages, msgWithName];
+        } else {
+            updatedConversation.messages = [msgWithName];
+        }
+        const addMsg = await conversationRef.set(updatedConversation);
+        return updatedConversation
+    } catch (error) {
+        console.error('Failed to track conversation', error)
+        return false
+    }
+
+}
+
+
+async function buildPrompt(character, conversationRaw, entropy) {
+    const conversation = conversationRaw.messages;
+    let characterSheet;
+    try {
+        characterSheet = (await admin.firestore().doc(`characters/${character}`).get()).data();
+    } catch (error) {
+        console.error('Failed to get character sheet', error)
+        return []
+    }
+    const messages = [];
+    messages.push({
+        role: "system",
+        content: `You are in a chatroom made up of users and AI characters. You are playing a character. Response to all messages as the following character: 
+        Name: ${characterSheet?.name},
+        Occupation: ${characterSheet?.occupation},
+        Background: ${characterSheet?.background},
+        Expertise: ${characterSheet?.expertise},
+        The users come to this chatroom to have fun interacting with AI characters. Your job is to act and play a character. 
+        You are playing a character named ${characterSheet?.name}, and all responses should be in character. ${characterSheet?.name} is a good, human person who responds to all questions with friendliness and expertise.`
+    });
+    for (let i = 0; i < conversation.length; i++) {
+        if (conversation[i]?.author === characterSheet?.name) {
+            messages.push({
+                role: "assistant",
+                content: conversation[i]?.message,
+            })
+        } else {
+            if (i == conversation.length - 1) {
+                messages.push({
+                    role:'system',
+                    content: `Respond to the next message in character. Be witty, fun, and knowledgeable. If it is a question, answer it. If it is a statement, continue the conversation.
+                    This conversation has a limited number of responses before it ends. ${entropy === 1 ? 'This is the last message of the conversation. Don\'t ask a question in your response.' : `There are ${entropy} messages left in this conversation`}`,
+                })
+            }
+            messages.push({
+                role:'user',
+                content: `${conversation[i]?.author} said "${conversation[i]?.message}"`,
+            })
+        }
+    }
+    return messages
+}
+
+async function contactAIAPI(messages) {
+    try {
+        const configuration = new Configuration({
+            apiKey: process.env.OPEN_AI_KEY,
+        });
+        const openai = new OpenAIApi(configuration);
+        
+        const response = await openai.createChatCompletion({
+            model: "gpt-3.5-turbo",
+            messages: messages,
+        })
+        return response.data.choices[0].message;
+    } catch (error) {
+        console.error("PROBLEM CONTACTING API", error)
+        return false
+    }
+}
 
 
 function writeMessage(message, chatroom, characterID) {
@@ -60,19 +258,25 @@ function writeMessage(message, chatroom, characterID) {
         console.error('Failed to post AI message', error);
     }
     return
-    // try {
-    //     if (isUserSignedIn()) {
-    //         const userID = getUserID()
-    //         const chatroomRef = collection(getFirestore(), `public-chatrooms/${CHATROOMS}/${chatroom}`);
-    //         await addDoc(chatroomRef, {
-    //             message: messege,
-    //             chatroom: chatroom,
-    //             posted: serverTimestamp(),
-    //             author: userID,
-    //         });
-    //     }
-    // }
-    // catch(error) {
-    //   console.error('Error posting message', error);
-    // }
+}
+
+async function getUser(userID) {
+    if (!userID) {
+        return {
+            name: "Error",
+            pic: "",
+        }
+    }
+    try {
+        const userObj = (await admin.firestore().doc(`users/${userID}`).get()).data();
+        const user = {
+                name: userObj.name,
+                pic: userObj.pic,
+                uid: userID,
+            }
+        return user;
+    }
+    catch(error) {
+        console.error('Error retrieving user data', error);
+    }
 }

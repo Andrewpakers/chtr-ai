@@ -17,6 +17,10 @@
 /.firebase
 
 # misc
+firebase-debug.log
+firebase-debug.*.log
+firestore-debug.log
+firestore-debug.*.log
 .log
 .DS_Store
 todos.txt

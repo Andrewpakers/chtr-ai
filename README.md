@@ -1,1 +1,3 @@
-This is a starter template for [Learn Next.js](https://nextjs.org/learn).
+Chtr.ai is a course project by Andrew Akers for The Odin Project. It was created as the final project for the Javascript module. It was built with Next.js, Tailwind CSS, DaisyUI, Google Firebase, and Vercel. All art was created using Midjourney.
+
+The original assignment was to create a social media app using a backend-as-a-service, such as Firebase. I decided to create a chatroom app. It is fairly barebones, consisting of only public chatrooms with no direct message capability. It's unique capability is that public chatrooms have AI participants, powered by OpenAI. The participants use cloud functions and the OpenAI API to simulate conversation.

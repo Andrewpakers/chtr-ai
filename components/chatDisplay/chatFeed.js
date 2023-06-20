@@ -14,10 +14,14 @@ function MessageList({ messages, activeChat }) {
     if (activeChatMessages.length > 0) {
         return (
             activeChatMessages.map((message) => {
+                let title = message.title;
+                if (message.hasOwnProperty('botMessage')) {
+                    title = title + " BOT";
+                }
                 return (
                     <MessageBox
                     position={message.position}
-                    title={message.title}
+                    title={title}
                     type={message.type}
                     text={message.text}
                     date={message.posted}
@@ -45,7 +49,7 @@ export default function ChatFeed() {
     const anchorRef = useRef(null);
     const feedRef = useRef(null);
     useEffect(() => {
-        if (feedRef.current.scrollHeight - feedRef.current.scrollTop <= 690 || 
+        if (feedRef.current.scrollHeight - feedRef.current.scrollTop <= 1300 || 
             feedRef.current.scrollTop === 0 ||
             messages.at(-1).position === 'right') {
 
@@ -54,10 +58,12 @@ export default function ChatFeed() {
         }
     }, [messages])
 
-
+    function scrollManager() {
+        console.log(feedRef.current.scrollHeight - feedRef.current.scrollTop);
+    }
 
     return (
-        <div ref={feedRef} className="h-[595px] w-full p-0 overflow-y-scroll">
+        <div ref={feedRef} onScroll={scrollManager} className="h-[595px] w-full p-0 overflow-y-scroll">
             <MessageList messages={messages} activeChat={activeChat} />
             <div ref={anchorRef} />
         </div>
