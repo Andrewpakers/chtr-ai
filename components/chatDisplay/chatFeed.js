@@ -3,15 +3,10 @@ import MessageBox from "./chatFeed/messageBox";
 import { messagesContext, chatContext } from "../../context/context";
 
 function MessageList({ messages, activeChat }) {
-    let activeChatMessages = [];
-    for (let i = 0; i < messages.length; i++) {
-        if (messages[i].chatroom === activeChat) {
-            activeChatMessages = messages[i].messages;
-            break
-        }
-    }
-    useEffect(() => console.log(activeChatMessages), [messages]);
-    if (activeChatMessages.length > 0) {
+    useEffect(() => {
+    }, [messages])
+    const activeChatMessages = messages.find((chat) => chat.chatroom.name === activeChat)?.messages;
+    if (activeChatMessages) {
         return (
             activeChatMessages.map((message) => {
                 let title = message.title;
@@ -26,6 +21,8 @@ function MessageList({ messages, activeChat }) {
                     text={message.text}
                     date={message.posted}
                     key={message.id}
+                    id={message.id}
+                    activeChat={activeChat}
                     />
                 );
             })
@@ -58,24 +55,27 @@ export default function ChatFeed() {
         }
     }, [messages])
 
-    function scrollManager() {
-        console.log(feedRef.current.scrollHeight - feedRef.current.scrollTop);
-    }
+    // function scrollManager() {
+    //     console.log(feedRef.current.scrollHeight - feedRef.current.scrollTop);
+    // }
 
     return (
-        <div ref={feedRef} onScroll={scrollManager} className="h-[595px] w-full p-0 overflow-y-scroll">
+        <div ref={feedRef} className="h-[595px] w-full p-0 overflow-y-scroll">
             <MessageList messages={messages} activeChat={activeChat} />
             <div ref={anchorRef} />
         </div>
     );
 }
 
-
-/**
- * example chatrooms object: 
- {
-    "name": "test-room-2",
-    "message": "Did scroll?",
-    "id": "Ggy6xOzv5ZvNsTcnrhoo"
+const mockMessage = {
+    "type": "text",
+    "title": "John BOT",
+    "chatroom": "test-room-1",
+    "text": "  John BOT said \"Well, it was lovely chatting with \n  you, Cael450! Keep exploring and questioning the \n  world around you. You never know what you might \n  discover. Until next time!\"",
+    "posted": "2023-06-24T16:40:42.398Z",
+    "author": "John",
+    "id": "Mh6qsHVzMgc995FPv9qZ",
+    "botMessage": true,
+    "position": "left"
 }
- */
+

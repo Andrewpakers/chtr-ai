@@ -24,17 +24,32 @@ export async function initChat(setActiveChat, setChatrooms) {
         .then((value) => setActiveChat(value[0]?.name), (err) => console.error("Couldn't identify default chat", err));
 }
 
-export async function initMessages(messages, setMessages, chatrooms, updateMessages, messagesRef) {
+export async function initMessages(messages, setMessages, chatrooms, updateMessages) {
     if (messages.length === 0) {
+        const newMessages = [];
         for (let i = 0; i < chatrooms.length; i++) {
-            // Use new getMessagesForAllChats
-            getMessagesForAllChats(chatrooms)
-                .then((value) => {
-                    setMessages(value);
-            }, (err) => console.error("Couldn't retrieve messages", err))
+            const chatFolder = {
+                chatroom: chatrooms[i],
+                messages: [],
+            }
+            newMessages.push(chatFolder);
+        //     // Use new getMessagesForAllChats
+        // //    getMessagesForAllChats(chatrooms)
+        // //        .then((value) => {
+        // //           setMessages(value);
+        //  //   }, (err) => console.error("Couldn't retrieve messages", err))
+        //  //   .then(() => {
+        //  //       const unsubscribes = subChatroom(chatrooms, updateMessages, messagesRef.current);
+        //  //       return unsubscribes;
+        // //    }, (err) => console.error(err))
+        //// }
+        // //const unsubscribes = subChatroom(chatrooms, updateMessages, messagesRef.current);
+        // //return unsubscribes;
         }
-        const unsubscribes = subChatroom(chatrooms, updateMessages, messagesRef.current);
-        return unsubscribes;
+        setMessages(newMessages);
+        // const unsubscribes = subChatroom(chatrooms, updateMessages);
+        // return unsubscribes;
+        return newMessages;
     }
 }
 

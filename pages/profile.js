@@ -47,7 +47,7 @@ export default function Profile() {
     return (
         <div className="py-4 h-[650px] flex flex-col gap-4">
             <h1 className="text-4xl">Preferences</h1>
-            <div>
+            <form>
                 <label className="label">
                     <span className="label-text text-base-content">Display name</span>
                 </label>
@@ -55,7 +55,7 @@ export default function Profile() {
                     <input type="text" placeholder={username} onKeyDown={handleKeyDown} value={displaynameInput} onChange={handleChange} className="input input-bordered input-secondary input-sm" />
                     <button className="btn btn-sm btn-secondary" type="button" onClick={handleClick}>Save</button>
                 </div>
-            </div>
+            </form>
             
         </div>
     );

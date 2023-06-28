@@ -1,4 +1,3 @@
-import wrap from 'word-wrap';
 import { getUserID, getUserObj, isUserSignedIn } from './auth';
 import {
     getFirestore,
@@ -14,7 +13,9 @@ import {
     serverTimestamp,
     addDoc,
     Timestamp,
-    onSnapshot
+    onSnapshot,
+    deleteDoc,
+    updateDoc
 } from 'firebase/firestore';
 
 // constant that determines what collection to retrieve chatrooms.
@@ -71,14 +72,27 @@ export async function getAllChats() {
 
 export async function formatMessage(docObj, id, userID) {
     const authorDisplayName = (await getUser(docObj.author)).name;
-    const wrappedText = wrap(String(docObj.message));
+    // console.log("docObj", docObj);
     const messageObj = {
         type: 'text',
         title: authorDisplayName,
-        text: wrappedText,
-        posted: docObj.posted.toDate(),
+        chatroom: docObj.chatroom,
+        text: docObj.message,
+        posted: docObj.posted?.toDate(),
         author: docObj.author,
         id: id,
+    }
+    if (messageObj.posted === null || messageObj.posted === undefined) {
+        try {
+            let date = await getCurrentServerTime();
+            if (!date) {
+                date = Timestamp.now();
+            }
+            messageObj.posted = date.toDate();
+        } catch (err) {
+            console.error("Error retrieving current server time", err);
+            messageObj.posted = Timestamp.now().toDate();
+        }
     }
     if (docObj.hasOwnProperty('botMessage')) {
         messageObj['botMessage'] = true;
@@ -158,10 +172,10 @@ export async function getMessagesForAllChats(chatrooms, limitArg = 50) {
         // push to array for all chatroom/message objects
         allMessageArray.push({
             chatroom: chatrooms[i].name,
-            messages: messageArray,
+            // messages: messageArray,
+            messages: [],
         });
     }
-
     return allMessageArray;
 }
 
@@ -183,17 +197,30 @@ export async function subChatroom(chatrooms, callback) {
     const arrayOfUnscubscribe = [];
 
     for (let j = 0; j < chatrooms.length; j++) {
-        const q = query(collection(getFirestore(), `public-chatrooms/${CHATROOMS}/${chatrooms[j].name}`), where("posted", ">", time), orderBy('posted', 'desc'));
-        const unsubscribe = onSnapshot(q, async (querySnapshot) => {
-            const userID = getUserID();
-            let messageObj;
-            if (querySnapshot.docs.length > 0) {
-                messageObj = await formatMessage(querySnapshot.docs[0].data(), querySnapshot.docs[0].id, userID);
-            }
-            time = getCurrentServerTime();
-            if (messageObj) {
-                callback(messageObj, chatrooms[j].name);
-            }
+        const q = query(collection(getFirestore(), `public-chatrooms/${CHATROOMS}/${chatrooms[j].name}`), limit(200), orderBy('posted', 'desc'));
+        const unsubscribe = onSnapshot(q, (querySnapshot) => {
+            console.log("querySnapshot", chatrooms[j].name, querySnapshot.docs);
+            querySnapshot.docChanges().forEach(async (change) => {
+                if (change.type === "added") {
+                    const userID = getUserID();
+                    let messageObj;
+                    messageObj = await formatMessage(change.doc.data(), change.doc.id, userID);
+                    if (messageObj) {
+                        callback(messageObj, chatrooms[j].name);
+                    }
+                }
+                if (change.type === "modified") {
+                    const userID = getUserID();
+                    const messageObj = await formatMessage(change.doc.data(), change.doc.id, userID);
+                    if (messageObj) {
+                        callback(messageObj, chatrooms[j].name, "modified", change.doc.id);
+                    }
+
+                }
+                if (change.type === "removed") {
+                    callback({}, chatrooms[j].name, "removed", change.doc.id);
+                }
+            });
         });
         arrayOfUnscubscribe.push(unsubscribe);
     }
@@ -227,6 +254,24 @@ export async function postMessage(chatroom, messege) {
     }
 }
 
+export async function updateMessage(chatroom, messageID, message, deleteMsg = false) {
+    try {
+        const chatroomRef = collection(getFirestore(), `public-chatrooms/${CHATROOMS}/${chatroom}`);
+        const docRef = doc(chatroomRef, messageID);
+        const currentData = await getDoc(docRef);
+        if (deleteMsg) {
+            await deleteDoc(docRef);
+        } else {
+            await updateDoc(docRef, {
+                message: message,
+                posted: currentData.data().posted,
+            });
+        }
+    } catch(err) {
+        console.error('Error updating message', err);
+    }
+}
+
 export async function saveUser(displayname, setDisplayName) {
     // Create a database of user profile data
     try {
@@ -256,6 +301,7 @@ export async function saveUser(displayname, setDisplayName) {
       console.error('Error saving user profile', error);
     }
 }
+
 const memoizeUsernames = [];
 export async function getUser(userID) {
     if (!userID) {
