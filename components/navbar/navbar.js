@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Image from 'next/image';
 import Link from "next/link";
 import {
@@ -8,9 +8,11 @@ import {
 import logoImage from "../../public/assets/logo.png"
 import { isUserSignedIn, SignIn, UsernameLink } from "../../utils/auth";
 import ThemePicker from "./themePicker";
+import ThemePickerMobile from "./themePickerMobile";
 
 export default function Navbar() {
     const [isSignedIn, setIsSignedIn] = useState(isUserSignedIn());
+    const themePickerRef = useRef(null);
 
     onAuthStateChanged(getAuth(), (user) => {
         if (user) {
@@ -45,6 +47,9 @@ export default function Navbar() {
                 <li key={3}>
                   <UsernameLink />
                 </li>
+                <li key={4}>
+                  <a className="text-base-content" onClick={()=> document.getElementById(`themes-modal`).classList.add('modal-open')}>Themes</a>
+                </li>
               </ul>
             </div>
             <a className="flex" href="/">
@@ -62,6 +67,17 @@ export default function Navbar() {
               </span>
             </a>
           </div>
+          <dialog id={`themes-modal`} className="modal modal-bottom sm:modal-middle">
+            <form method="dialog" className="modal-box">
+            <button onClick={() => document.getElementById(`themes-modal`).classList.remove('modal-open')} className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+                <div className="modal-action flex overflow-hidden flex-wrap items-center justify-center">
+                <ThemePickerMobile />
+                </div>
+            </form>
+            <form method="dialog" className="modal-backdrop">
+                <button onClick={() => document.getElementById(`themes-modal`).classList.remove('modal-open')}>close</button>
+            </form>
+        </dialog>
           <div className="navbar-center hidden lg:flex">
             <ul className="menu menu-horizontal px-1">
               <li key={4}>
@@ -81,10 +97,12 @@ export default function Navbar() {
               <li key={6}>
                 <UsernameLink />
               </li>
+              <li key={7}>
+                <ThemePicker />
+              </li>
             </ul>
           </div>
           <div className="navbar-end">
-            <ThemePicker />
             <SignIn isSignedIn={isSignedIn} setIsSignedIn={setIsSignedIn}>Sign In</SignIn>
           </div>
         </div>

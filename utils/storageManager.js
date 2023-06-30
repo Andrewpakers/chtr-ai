@@ -199,7 +199,6 @@ export async function subChatroom(chatrooms, callback) {
     for (let j = 0; j < chatrooms.length; j++) {
         const q = query(collection(getFirestore(), `public-chatrooms/${CHATROOMS}/${chatrooms[j].name}`), limit(200), orderBy('posted', 'desc'));
         const unsubscribe = onSnapshot(q, (querySnapshot) => {
-            console.log("querySnapshot", chatrooms[j].name, querySnapshot.docs);
             querySnapshot.docChanges().forEach(async (change) => {
                 if (change.type === "added") {
                     const userID = getUserID();
@@ -272,7 +271,7 @@ export async function updateMessage(chatroom, messageID, message, deleteMsg = fa
     }
 }
 
-export async function saveUser(displayname, setDisplayName) {
+export async function saveUser(displayname, setDisplayName, occupation = null, background = null) {
     // Create a database of user profile data
     try {
         if (isUserSignedIn()) {
@@ -280,7 +279,16 @@ export async function saveUser(displayname, setDisplayName) {
             const userObj = getUserObj()
             const userStoreRef = collection(getFirestore(), 'users');
             const currentData = await getDoc(doc(collection(getFirestore(), 'users'), userID));
-            const updatedUserObj = {}
+            const updatedUserObj = structuredClone(currentData.data());
+            if (occupation) {
+                updatedUserObj.occupation = occupation;
+            }
+            if (background) {
+                updatedUserObj.background = background;
+            }
+            if (!currentData.data().hasOwnProperty('created')) {
+                updatedUserObj.created = serverTimestamp();
+            }
             if (currentData.data().customized !== true && !displayname) {
                 updatedUserObj.name = userObj.displayName;
                 updatedUserObj.pic = userObj.photoURL;
@@ -294,7 +302,14 @@ export async function saveUser(displayname, setDisplayName) {
                 updatedUserObj.customized = true;
                 await setDoc(doc(userStoreRef, userID), updatedUserObj);
                 setDisplayName(displayname);
+            } else if (currentData.data().customized === true && !displayname) {
+                updatedUserObj.name = currentData.data().name;
+                updatedUserObj.pic = userObj.photoURL;
+                updatedUserObj.lastUpdated = serverTimestamp();
+                updatedUserObj.customized = true;
+                await setDoc(doc(userStoreRef, userID), updatedUserObj);
             }
+            
         }
     }
     catch(error) {
@@ -303,7 +318,7 @@ export async function saveUser(displayname, setDisplayName) {
 }
 
 const memoizeUsernames = [];
-export async function getUser(userID) {
+export async function getUser(userID, detailed = false) {
     if (!userID) {
         return {
             name: "Error",
@@ -311,7 +326,7 @@ export async function getUser(userID) {
         }
     }
     const filteredMemo = memoizeUsernames.filter(e => e.uid === userID);
-    if (filteredMemo.length > 0) {
+    if (filteredMemo.length > 0 && !detailed) {
         return filteredMemo[0];
     }
     try {
@@ -321,18 +336,36 @@ export async function getUser(userID) {
                 pic: userObj.pic,
                 uid: userID,
             }
-        memoizeUsernames.push(user);
-        if (memoizeUsernames.length > 100) {
-            memoizeUsernames.shift();
+        if (detailed) {
+            if (userObj.hasOwnProperty('isBot') && userObj.isBot) {
+                try {
+                    const botCharacterSheet = (await getDoc(doc(getFirestore(), 'characters', userID))).data();
+                    user.background = botCharacterSheet?.background;
+                    user.occupation = botCharacterSheet?.occupation;
+                } catch (err) {
+                    console.error('Error retrieving bot data', err);
+                }
+            } else {
+                if (userObj.hasOwnProperty('background')) {
+                    user.background = userObj.background;
+                } else {
+                    user.background = '';
+                }
+                if (userObj.hasOwnProperty('occupation')) {
+                    user.occupation = userObj.occupation;
+                } else {
+                    user.occupation = '';
+                }
+            }
+        } else {
+            memoizeUsernames.push(user);
+            if (memoizeUsernames.length > 100) {
+                memoizeUsernames.shift();
+            }
         }
         return user;
     }
     catch(error) {
         console.error('Error retrieving user data', error);
     }
-}
-
-const mockDate = {
-    "seconds": 1686374572,
-    "nanoseconds": 525000000
 }

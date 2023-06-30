@@ -12,5 +12,8 @@ service cloud.firestore {
     match /time/{document=**} {
     	allow read, write: if true;
     }
+    match /characters/{document=**} {
+      allow read: if true;
+    }
   }
 } 

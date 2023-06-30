@@ -112,12 +112,46 @@ async function trackEntropy(messageObj, chatroom, reset = false) {
     .firestore()
     .collection(`public-chatrooms/${CHATROOMS}/${chatroom}`)
     .doc("!entropyTracker");
-  const previousEntropy = (await entropyRef.get()).data()?.entropy;
+  const chatDefaultEntropyRef = admin
+    .firestore()
+    .collection(`public-chatrooms/${CHATROOMS}/${chatroom}`)
+    .doc("!defaultEntropy");
+  let previousEntropy;
+  let defaultEntropy;
+  let chatDefaultEntropy;
+  try {
+    previousEntropy = (await entropyRef.get()).data()?.entropy;
+    chatDefaultEntropy = (await chatDefaultEntropyRef.get()).data();
+  } catch (err) {
+    console.error("Failed to retrieve entropy:", err);
+  }
+  if (chatDefaultEntropy === null || chatDefaultEntropy === undefined) {
+    const globalDefaultEntropyRef = admin
+      .firestore()
+      .collection(`public-chatrooms`)
+      .doc("!defaultEntropy");
+    let globalDefaultEntropy;
+    try {
+      globalDefaultEntropy = (await globalDefaultEntropyRef.get()).data();
+    } catch (err) {
+      console.error("Failed to retrieve global default entropy:", err);
+    }
+    if (
+      globalDefaultEntropy === null ||
+      globalDefaultEntropy === undefined
+    ) {
+      defaultEntropy = DEFAULT_ENTROPY;
+    } else {
+      defaultEntropy = globalDefaultEntropy.defaultEntropy;
+    }
+  } else {
+    defaultEntropy = chatDefaultEntropy.defaultEntropy;
+  }
   // Reset entropy if commanded to
   if (reset) {
     try {
       const resetEntropy = await entropyRef.set({
-        entropy: DEFAULT_ENTROPY,
+        entropy: defaultEntropy,
       });
       return;
     } catch (err) {
@@ -131,12 +165,12 @@ async function trackEntropy(messageObj, chatroom, reset = false) {
     previousEntropy === undefined ||
     previousEntropy === null
   ) {
-    currentEntropy = DEFAULT_ENTROPY;
+    currentEntropy = defaultEntropy;
   } else if (
     previousEntropy === 0 &&
     !messageObj.hasOwnProperty("botMessage")
   ) {
-    currentEntropy = DEFAULT_ENTROPY;
+    currentEntropy = defaultEntropy;
   } else {
     currentEntropy = Number(previousEntropy);
   }

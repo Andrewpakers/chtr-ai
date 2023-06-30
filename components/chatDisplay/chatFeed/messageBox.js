@@ -3,11 +3,12 @@ import { useState } from 'react'
 import TimeAgo from 'javascript-time-ago'
 // English.
 import en from 'javascript-time-ago/locale/en'
+import Link from 'next/link'
 TimeAgo.addDefaultLocale(en)
 // Create formatter (English).
 const timeAgo = new TimeAgo('en-US')
 
-export default function MessageBox({ position,  title, type, text, date, activeChat, id }) {
+export default function MessageBox({ position,  title, type, text, date, activeChat, id, userID }) {
     const [messageInput, setMessageInput] = useState('');
     const timeAgoPosted = timeAgo.format(Date.parse(date));
 
@@ -17,17 +18,17 @@ export default function MessageBox({ position,  title, type, text, date, activeC
     if (position === 'right') {
         return (
             <div className="chat chat-end">
-                <div className="chat-header flex flex-col items-end gapy-0.5 mb-1">
+                <Link href={`/profile/${userID}`} className="chat-header flex flex-col items-end gapy-0.5 mb-1">
                     {title}
                     <time className="ml-1 text-xs opacity-50">{timeAgoPosted}</time>
-                </div>
+                </Link>
                 <div className="chat-bubble chat-bubble-primary break-words hyphens-auto">{text}</div>
                 <div className="chat-footer text-xs" onClick={()=> document.getElementById(`editModal-${id}`).classList.add('modal-open')}>Edit</div>
                 <dialog id={`editModal-${id}`} className="modal modal-bottom sm:modal-middle">
                     <form method="dialog" className="modal-box">
                         <button onClick={() => document.getElementById(`editModal-${id}`).classList.remove('modal-open')} className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
                         <label htmlFor='messageInput' className="label">
-                            <span className="label-text text-base-content">Display name</span>
+                            <span className="label-text text-base-content">Message</span>
                         </label>
                         <input id='messageInput' type="text" placeholder={text} value={messageInput} onChange={handleChange} className="input input-bordered input-secondary input-sm" />
                         <div className="modal-action">
@@ -51,10 +52,10 @@ export default function MessageBox({ position,  title, type, text, date, activeC
     }
     return (
         <div className="chat chat-start">
-            <div className="chat-header flex flex-col items-end gapy-0.5 mb-1">
+            <Link href={`/profile/${userID}`} className="chat-header flex flex-col items-end gapy-0.5 mb-1">
                 {title}
                 <time className="ml-1 text-xs opacity-50">{timeAgoPosted}</time>
-            </div>
+            </Link>
             <div className="chat-bubble chat-bubble-secondary break-words hyphens-auto">{text}</div>
         </div>
     );

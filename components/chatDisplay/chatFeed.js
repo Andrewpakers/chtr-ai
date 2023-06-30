@@ -23,6 +23,7 @@ function MessageList({ messages, activeChat }) {
                     key={message.id}
                     id={message.id}
                     activeChat={activeChat}
+                    userID={message.author}
                     />
                 );
             })

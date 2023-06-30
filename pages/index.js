@@ -1,6 +1,4 @@
-import { useEffect, useState } from "react";
-import Layout from "../components/layout";
-import Carousel from "../components/carousel";
+import { useState } from "react";
 import { getSquareImages } from "../utils/imageManager";
 import Blade from "../components/blade";
 
@@ -16,7 +14,6 @@ export default function Home() {
   return (
     <div>
       <main className="flex flex-col">
-        <Carousel />
         <Blade 
         image={squareImages[0]}
         headline={firstBladeHeadline}
