@@ -11,7 +11,7 @@ async function updateChatroomList(setChatrooms) {
             {
                 name: chatrooms[i],
                 message: message[0]?.text,
-                id: message[0]?.id,
+                id: i,
             }
         );
     }
@@ -33,18 +33,6 @@ export async function initMessages(messages, setMessages, chatrooms, updateMessa
                 messages: [],
             }
             newMessages.push(chatFolder);
-        //     // Use new getMessagesForAllChats
-        // //    getMessagesForAllChats(chatrooms)
-        // //        .then((value) => {
-        // //           setMessages(value);
-        //  //   }, (err) => console.error("Couldn't retrieve messages", err))
-        //  //   .then(() => {
-        //  //       const unsubscribes = subChatroom(chatrooms, updateMessages, messagesRef.current);
-        //  //       return unsubscribes;
-        // //    }, (err) => console.error(err))
-        //// }
-        // //const unsubscribes = subChatroom(chatrooms, updateMessages, messagesRef.current);
-        // //return unsubscribes;
         }
         setMessages(newMessages);
         // const unsubscribes = subChatroom(chatrooms, updateMessages);

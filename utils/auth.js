@@ -80,7 +80,7 @@ export function SignIn({ isSignedIn }) {
     }
     return (
       <div >
-        <button className="btn btn-ghost" type="button" onClick={signIn}>
+        <button className="btn btn-secondary" type="button" onClick={signIn}>
           Sign in
         </button>
       </div>
@@ -108,10 +108,12 @@ export function UsernameLink(){
 
   if (isLoggedIn) {
       return (
-          <Link href="/profile"
-          className="text-base-content">
-                  Profile
-          </Link>
+          <li key={6}>
+            <Link href="/profile"
+            className="text-base-content">
+                    Profile
+            </Link>
+          </li>
       );
   } else {
       return null;

@@ -50,6 +50,14 @@ export default function Navbar() {
                 <li key={4}>
                   <a className="text-base-content" onClick={()=> document.getElementById(`themes-modal`).classList.add('modal-open')}>Themes</a>
                 </li>
+                <li key={5}>
+                  <Link 
+                  href="https://github.com/Andrewpakers/chtr-ai"
+                  className="text-base-content"
+                  >
+                  GitHub
+                  </Link>
+                </li>
               </ul>
             </div>
             <a className="flex" href="/">
@@ -94,11 +102,17 @@ export default function Navbar() {
                 Chat
                 </Link>
               </li>
-              <li key={6}>
-                <UsernameLink />
-              </li>
+              <UsernameLink />
               <li key={7}>
                 <ThemePicker />
+              </li>
+              <li key={8}>
+                <Link 
+                  href="https://github.com/Andrewpakers/chtr-ai"
+                  className="text-base-content"
+                  >
+                  GitHub
+                </Link>
               </li>
             </ul>
           </div>

@@ -64,7 +64,7 @@ export default function ChatDisplay() {
 
     return (
         <div className="w-full self-stretch">
-            <div className="w-full h-[650px]">
+            <div className="w-full h-[calc(100%-50px)]">
                 <ChatFeed />
                 <InputIfSignedIn
                         inputRef={inputRef}

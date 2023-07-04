@@ -3,6 +3,7 @@ import { chatContext, chatroomListContext, messagesContext } from "../context/co
 import { initChat, initMessages, updateAllMessages } from "../utils/chatUtils";
 import { subChatroom } from "../utils/storageManager";
 import { isUserSignedIn, subSignIn } from "../utils/auth";
+import { saveUser } from "../utils/storageManager";
 
 export default function Initializer({ children }) {
     const [activeChat, setActiveChat] = useContext(chatContext);
@@ -22,7 +23,6 @@ export default function Initializer({ children }) {
 
     // handles message updates
     function updateMessages(newMessage, chatroom, action = "added", msgId = null) {
-        // console.log('updateMessages called', newMessage, chatroom, isModification, msgId);
         if (action === "modified") {
             setMessages(prevMessages => {
                 const copyMessages = structuredClone(prevMessages);
@@ -93,6 +93,7 @@ export default function Initializer({ children }) {
     function handleLogIn(value) {
         if (value !== isLoggedIn) {
             setIsLoggedIn(value);
+            saveUser();
         }
     }
     // re-process messages when user logs in or out
@@ -115,10 +116,7 @@ export default function Initializer({ children }) {
     }, [isLoggedIn]);
 
     useEffect(() => {
-        console.log(chatrooms, messages)
-        console.log(hasSubscribed);
         if (messages.length > 0 && !hasSubscribed) {
-            console.log("hasSubscribed", hasSubscribed);
             subChatroom(chatrooms, updateMessages);
             setHasSubscribed(true);
         }
@@ -127,9 +125,6 @@ export default function Initializer({ children }) {
     // Subs to each chatroom in order to display new messages
     useEffect(() => {
         initMessages(messages, setMessages, chatrooms, updateMessages)
-            // .then((value) => {
-            //     setUnsubscribes(value);
-            // }, (err) => console.error(err));
     }, [chatrooms]);
     // initialize chatroom list
     useEffect(() => {

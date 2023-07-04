@@ -9,13 +9,15 @@ require("dotenv").config({path: "./.env"});
 
 // constant that determines what collection to retrieve chatrooms.
 // "test" for test, "prod" for prod
-const CHATROOMS = "test";
+const CHATROOMS = "prod";
 
 // Const that determines what masterlist to use for which chatrooms
-const CHATROOMSLIST = "testList";
+const CHATROOMSLIST = "prodList";
 
 // Number of bot messages in a bot-only conversation
 const DEFAULT_ENTROPY = 5;
+
+const MAX_WORDS = 30;
 
 admin.initializeApp();
 
@@ -66,7 +68,7 @@ exports.onNewMessage = onDocumentCreated(
         if (!nextTalker) {
           return;
         }
-        const prompt = await buildPrompt(nextTalker, conversation, entropy);
+        const prompt = await buildPrompt(nextTalker, conversation, entropy, chatroom);
         const response = await contactAIAPI(prompt);
 
         try {
@@ -103,7 +105,7 @@ function resetEverything(chatroom, isActiveRef) {
 }
 
 async function trackEntropy(messageObj, chatroom, reset = false) {
-  // 10 bot messages per conversation
+  // Max bot messages per conversation is defined in the database
   // entropy represents the number of bot messages left
   // in a conversation.
   // Entropy goes up when a user posts a message, and down when a bot
@@ -159,7 +161,6 @@ async function trackEntropy(messageObj, chatroom, reset = false) {
     }
   }
   let currentEntropy;
-  console.log("previousEntropy", previousEntropy);
   if (
     isNaN(previousEntropy) ||
     previousEntropy === undefined ||
@@ -202,12 +203,12 @@ async function pickNextTalker(conversation, chatroom) {
     characterList = (
       await admin
         .firestore()
-        .doc(`public-chatrooms/${CHATROOMS}/${chatroom}/CharacterList`)
+        .doc(`public-chatrooms/${CHATROOMS}/${chatroom}/!characterList`)
         .get()
     ).data();
     if (!characterList) {
       characterList = (
-        await admin.firestore().doc(`characters/CharacterList`).get()
+        await admin.firestore().doc(`characters/!characterList`).get()
       ).data();
     }
   } catch (err) {
@@ -220,7 +221,8 @@ async function pickNextTalker(conversation, chatroom) {
       if (characterList[character] === true) {
         if (
           messageObj.message?.includes(character) &&
-          messageObj.author !== character
+          messageObj.author !== character &&
+          messageObj.botMessage === false
         ) {
           return character;
         }
@@ -294,15 +296,21 @@ async function trackConversation(messageObj, chatroom) {
   }
 }
 
-async function buildPrompt(character, conversationRaw, entropy) {
+async function buildPrompt(character, conversationRaw, entropy, chatroom) {
   const conversation = conversationRaw.messages;
   let characterSheet;
+  let chatDescription;
+  let rules;
   try {
     characterSheet = (
       await admin.firestore().doc(`characters/${character}`).get()
     ).data();
+    chatDescription = (await admin.firestore()
+      .doc(`public-chatrooms/${CHATROOMS}/${chatroom}/!description`)
+      .get()).data().description;
+    rules = (await admin.firestore().doc(`global/!rules`).get()).data().rules;
   } catch (error) {
-    console.error("Failed to get character sheet", error);
+    console.error("Failed to get character sheet, rules, or chatroom description", error);
     return [];
   }
   const messages = [];
@@ -314,7 +322,9 @@ async function buildPrompt(character, conversationRaw, entropy) {
         Background: ${characterSheet?.background},
         Expertise: ${characterSheet?.expertise},
         The users come to this chatroom to have fun interacting with AI characters. Your job is to act and play a character. 
-        You are playing a character named ${characterSheet?.name}, and all responses should be in character. ${characterSheet?.name} is a good, human person who responds to all questions with friendliness and expertise.`,
+        You are playing a character named ${characterSheet?.name}, and all responses should be in character. ${characterSheet?.name} is a good, human person who responds to all questions with friendliness and expertise.
+        Chatroom desciption: ${chatDescription}
+        Chatroom rules: ${rules}`,
   });
   for (let i = 0; i < conversation.length; i++) {
     if (conversation[i]?.author === characterSheet?.name) {
@@ -331,7 +341,7 @@ async function buildPrompt(character, conversationRaw, entropy) {
                       entropy === 1
                         ? "This is the last message of the conversation. Don't ask a question in your response."
                         : `There are ${entropy} messages left in this conversation.`
-                    } Respond in first person, without using "${characterSheet?.name} said", "${characterSheet?.name} responds", or "${characterSheet?.name}:"`,
+                    } Keep your response to ${MAX_WORDS} words in length. Respond in first person, without using "${characterSheet?.name} said", "${characterSheet?.name} responds", or "${characterSheet?.name}:"`,
         });
       }
       messages.push({

@@ -27,13 +27,14 @@ export default function Layout ({children}) {
     <div className="max-w-4xl mx-auto bg-transparent text-slate-950">
         <Head>
             <title>Chtr.ai</title>
-            <link rel="icon" href="/favicon.ico" />
+            <link rel="icon" href="/favicon.ico" sizes="any" />
+            <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"></meta>
         </Head>
         <Navbar />
         <div className="">
             {children}
         </div>
-        <div className="border-t-2 border-secondary">
+        <div id="footer" className="border-t-2 border-secondary">
           <footer className="footer footer-center p-10 bg-base-200 text-base-content rounded gap-6 py-6">
             <div className="grid grid-flow-col gap-4">
               <Link href="/site/about" className="link link-hover">About us</Link> 

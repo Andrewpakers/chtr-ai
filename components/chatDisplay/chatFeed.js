@@ -61,7 +61,7 @@ export default function ChatFeed() {
     // }
 
     return (
-        <div ref={feedRef} className="h-[595px] w-full p-0 overflow-y-scroll">
+        <div ref={feedRef} className="h-[calc(100%-20px)] w-full p-0 overflow-y-scroll">
             <MessageList messages={messages} activeChat={activeChat} />
             <div ref={anchorRef} />
         </div>

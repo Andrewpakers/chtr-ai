@@ -20,10 +20,10 @@ import {
 
 // constant that determines what collection to retrieve chatrooms.
 // "test" for test, "prod" for prod
-const CHATROOMS = "test";
+const CHATROOMS = "prod";
 
 // Const that determines what masterlist to use for which chatrooms
-const CHATROOMSLIST = "testList"
+const CHATROOMSLIST = "prodList"
 
 /**
  * database schema:
@@ -72,7 +72,6 @@ export async function getAllChats() {
 
 export async function formatMessage(docObj, id, userID) {
     const authorDisplayName = (await getUser(docObj.author)).name;
-    // console.log("docObj", docObj);
     const messageObj = {
         type: 'text',
         title: authorDisplayName,
@@ -271,45 +270,42 @@ export async function updateMessage(chatroom, messageID, message, deleteMsg = fa
     }
 }
 
-export async function saveUser(displayname, setDisplayName, occupation = null, background = null) {
+export async function saveUser(displayname, setDisplayName, occupation, background) {
     // Create a database of user profile data
     try {
         if (isUserSignedIn()) {
             const userID = getUserID();
             const userObj = getUserObj()
             const userStoreRef = collection(getFirestore(), 'users');
-            const currentData = await getDoc(doc(collection(getFirestore(), 'users'), userID));
-            const updatedUserObj = structuredClone(currentData.data());
+            const currentData = (await getDoc(doc(collection(getFirestore(), 'users'), userID)))?.data();
+            let updatedUserObj;
+            if (currentData === null || currentData === undefined) {
+                updatedUserObj = {
+                    created: serverTimestamp(),
+                    lastUpdated: serverTimestamp(),
+                    customized: false,
+                    pic: userObj.photoURL,
+                    name: userObj.displayName,
+                    occupation: "",
+                    background: "",
+                };
+            } else {
+                updatedUserObj = structuredClone(currentData);
+            }
+            if (arguments.length === 0) {
+                updatedUserObj.lastUpdated = serverTimestamp();
+                await setDoc(doc(userStoreRef, userID), updatedUserObj);
+            }
             if (occupation) {
                 updatedUserObj.occupation = occupation;
             }
             if (background) {
                 updatedUserObj.background = background;
             }
-            if (!currentData.data().hasOwnProperty('created')) {
-                updatedUserObj.created = serverTimestamp();
-            }
-            if (currentData.data().customized !== true && !displayname) {
-                updatedUserObj.name = userObj.displayName;
-                updatedUserObj.pic = userObj.photoURL;
-                updatedUserObj.lastUpdated = serverTimestamp();
-                await setDoc(doc(userStoreRef, userID), updatedUserObj);
-                setDisplayName(userObj.displayName);
-            } else if (displayname) {
+            if (displayname) {
                 updatedUserObj.name = displayname;
-                updatedUserObj.pic = userObj.photoURL;
-                updatedUserObj.lastUpdated = serverTimestamp();
-                updatedUserObj.customized = true;
-                await setDoc(doc(userStoreRef, userID), updatedUserObj);
-                setDisplayName(displayname);
-            } else if (currentData.data().customized === true && !displayname) {
-                updatedUserObj.name = currentData.data().name;
-                updatedUserObj.pic = userObj.photoURL;
-                updatedUserObj.lastUpdated = serverTimestamp();
-                updatedUserObj.customized = true;
-                await setDoc(doc(userStoreRef, userID), updatedUserObj);
             }
-            
+            await setDoc(doc(userStoreRef, userID), updatedUserObj);            
         }
     }
     catch(error) {
@@ -317,17 +313,12 @@ export async function saveUser(displayname, setDisplayName, occupation = null, b
     }
 }
 
-const memoizeUsernames = [];
 export async function getUser(userID, detailed = false) {
     if (!userID) {
         return {
             name: "Error",
             pic: "",
         }
-    }
-    const filteredMemo = memoizeUsernames.filter(e => e.uid === userID);
-    if (filteredMemo.length > 0 && !detailed) {
-        return filteredMemo[0];
     }
     try {
         const userObj = (await getDoc(doc(getFirestore(), 'users', userID))).data();
@@ -357,15 +348,17 @@ export async function getUser(userID, detailed = false) {
                     user.occupation = '';
                 }
             }
-        } else {
-            memoizeUsernames.push(user);
-            if (memoizeUsernames.length > 100) {
-                memoizeUsernames.shift();
-            }
         }
         return user;
     }
     catch(error) {
         console.error('Error retrieving user data', error);
+        return {
+            name: "error",
+            uid: "error - " + Math.random(),
+            pic: "error",
+            background: "error",
+            occupation: "error",
+        }
     }
 }

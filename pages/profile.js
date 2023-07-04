@@ -25,7 +25,6 @@ export default function Profile() {
         setIsLoggedIn(isUserSignedIn());
         subSignIn(authChangedState);
         getUser(getUserID(), true).then((value) => {
-            console.log('user value', value);
             setDisplaynameInput(value?.name);
             setOccupationInput(value?.occupation);
             setBackgroundInput(value?.background);

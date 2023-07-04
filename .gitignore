@@ -30,7 +30,8 @@ firebase-debug.*.log
 firestore-debug.log
 firestore-debug.*.log
 ui-debug.log*
-.log
+*.log
+database-debug.log
 
 # local env files
 .env
