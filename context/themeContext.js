@@ -2,7 +2,7 @@ import React, { createContext, useMemo, useState } from "react";
 import useCustomEffect from "../hooks/useCustomEffect.hook";
 
   export const ThemeContext = createContext({
-    theme: "default",
+    theme: "bumblebee",
     setTheme: () => {},
   });
 
@@ -21,13 +21,13 @@ export const ThemeContextProvider = ({
 
     useCustomEffect(() => {
         const storeTheme = localStorage.getItem("theme");
-        applyTheme(storeTheme || "default");
+        applyTheme(storeTheme || "bumblebee");
     }, []);
 
 /**
    * Apply theme to 'html' tag on DOM.
    */
-  const applyTheme = (theme = "default") => {
+  const applyTheme = (theme = "bumblebee") => {
     let newTheme = theme;
     const html = document.getElementsByTagName("html")[0];
     localStorage.setItem("theme", theme);
